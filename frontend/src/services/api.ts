@@ -1535,6 +1535,35 @@ export async function removeFromCart(productId: string): Promise<{ message: stri
   return { message: 'Item removed from cart', cart: currentCart };
 }
 
+let memoryOrders: Order[] = [
+  {
+    orderId: 'ORD-2026-9001',
+    customerId: 'cust-101',
+    tailorId: '1',
+    productId: '1',
+    quantity: 1,
+    customerSnapshot: { customerId: 'cust-101', name: 'Abebe Bikila', email: 'abebe.b@example.com' },
+    tailorSnapshot: { tailorId: '1', businessName: 'Royal Habesha Couture', businessAddress: 'Bole Medhanealem, Addis Ababa' },
+    productSnapshot: { productId: '1', name: 'Custom Three-Piece Tuxedo', categoryName: 'Suit', image: '/images/tuxedo_suit.jpg', basePrice: 12500 },
+    customization: { fabric: 'Italian Pure Wool', lining: 'Paisley Silk', buttons: 'Horn Buttons', embroidery: 'Gold Monogram' },
+    measurementSnapshot: { chest: { value: 104, unit: 'cm' }, waist: { value: 84, unit: 'cm' }, shoulder: { value: 46, unit: 'cm' }, height: { value: 182, unit: 'cm' } },
+    pricingSnapshot: { basePrice: 12500, lineItems: [{ groupKey: 'fabric', groupName: 'FABRIC', choiceName: 'Italian Pure Wool', priceModifier: 2500 }, { groupKey: 'lining', groupName: 'LINING', choiceName: 'Paisley Silk', priceModifier: 1500 }], customizationModifiersTotal: 4000, totalCalculatedPrice: 16500, currency: 'ETB' },
+    paymentInfo: { status: 'PAID', paymentMethod: 'TELEBIRR', amountPaid: 16500 },
+    deliveryInfo: { recipientName: 'Abebe Bikila', address: 'Kazanchis Residence Tower, Apt 7B', contactPhone: '+251 91 123 4567', deliveryNotes: 'Deliver to front desk reception' },
+    status: 'IN_PRODUCTION',
+    statusHistory: [
+      { historyId: 'h-1', orderId: 'ORD-2026-9001', previousStatus: 'NONE', newStatus: 'PENDING_PAYMENT', actor: { userId: 'cust-101', role: 'CUSTOMER', name: 'Abebe Bikila' }, timestamp: '2026-09-13T10:00:00.000Z', notes: 'Order created with locked pricing and body measurement snapshot.' },
+      { historyId: 'h-2', orderId: 'ORD-2026-9001', previousStatus: 'PENDING_PAYMENT', newStatus: 'PAID', actor: { userId: 'cust-101', role: 'CUSTOMER', name: 'Abebe Bikila' }, timestamp: '2026-09-13T10:30:00.000Z', notes: 'Payment verified via Telebirr gateway' },
+      { historyId: 'h-3', orderId: 'ORD-2026-9001', previousStatus: 'PAID', newStatus: 'PENDING_TAILOR', actor: { userId: 'system', role: 'SYSTEM', name: 'Order Engine' }, timestamp: '2026-09-13T10:31:00.000Z', notes: 'Order queued in master tailor workshop queue' },
+      { historyId: 'h-4', orderId: 'ORD-2026-9001', previousStatus: 'PENDING_TAILOR', newStatus: 'ACCEPTED', actor: { userId: 'tailor-1', role: 'TAILOR', name: 'Royal Habesha Couture' }, timestamp: '2026-09-14T08:15:00.000Z', notes: 'Tailor workshop accepted order and assigned master cutter' },
+      { historyId: 'h-5', orderId: 'ORD-2026-9001', previousStatus: 'ACCEPTED', newStatus: 'MEASUREMENT_VERIFICATION', actor: { userId: 'tailor-1', role: 'TAILOR', name: 'Royal Habesha Couture' }, timestamp: '2026-09-14T14:00:00.000Z', notes: 'Verified chest and shoulder dimensions against tuxedo drafting blueprint' },
+      { historyId: 'h-6', orderId: 'ORD-2026-9001', previousStatus: 'MEASUREMENT_VERIFICATION', newStatus: 'IN_PRODUCTION', actor: { userId: 'tailor-1', role: 'TAILOR', name: 'Royal Habesha Couture' }, timestamp: '2026-09-15T06:00:00.000Z', notes: 'Wool fabric cut and assembly phase initiated' },
+    ],
+    createdAt: '2026-09-13T10:00:00.000Z',
+    updatedAt: '2026-09-15T06:00:00.000Z',
+  },
+];
+
 export async function fetchOrders(): Promise<Order[]> {
   try {
     const token = localStorage.getItem('sewfit_token');
@@ -1544,40 +1573,16 @@ export async function fetchOrders(): Promise<Order[]> {
     const res = await fetch(`${API_BASE}/api/orders`, { headers });
     if (res.ok) {
       const data = await res.json();
-      if (data.orders) return data.orders;
+      if (data.orders) {
+        memoryOrders = data.orders;
+        return data.orders;
+      }
     }
   } catch (err) {
     console.warn('Backend API unreachable, returning mock orders');
   }
 
-  return [
-    {
-      orderId: 'ORD-2026-9001',
-      customerId: 'cust-101',
-      tailorId: '1',
-      productId: '1',
-      quantity: 1,
-      customerSnapshot: { customerId: 'cust-101', name: 'Abebe Bikila', email: 'abebe.b@example.com' },
-      tailorSnapshot: { tailorId: '1', businessName: 'Royal Habesha Couture', businessAddress: 'Bole Medhanealem, Addis Ababa' },
-      productSnapshot: { productId: '1', name: 'Custom Three-Piece Tuxedo', categoryName: 'Suit', image: '/images/tuxedo_suit.jpg', basePrice: 12500 },
-      customization: { fabric: 'Italian Pure Wool', lining: 'Paisley Silk', buttons: 'Horn Buttons', embroidery: 'Gold Monogram' },
-      measurementSnapshot: { chest: { value: 104, unit: 'cm' }, waist: { value: 84, unit: 'cm' }, shoulder: { value: 46, unit: 'cm' }, height: { value: 182, unit: 'cm' } },
-      pricingSnapshot: { basePrice: 12500, lineItems: [{ groupKey: 'fabric', groupName: 'FABRIC', choiceName: 'Italian Pure Wool', priceModifier: 2500 }, { groupKey: 'lining', groupName: 'LINING', choiceName: 'Paisley Silk', priceModifier: 1500 }], customizationModifiersTotal: 4000, totalCalculatedPrice: 16500, currency: 'ETB' },
-      paymentInfo: { status: 'PAID', paymentMethod: 'TELEBIRR', amountPaid: 16500 },
-      deliveryInfo: { recipientName: 'Abebe Bikila', address: 'Kazanchis Residence Tower, Apt 7B', contactPhone: '+251 91 123 4567', deliveryNotes: 'Deliver to front desk reception' },
-      status: 'IN_PRODUCTION',
-      statusHistory: [
-        { historyId: 'h-1', orderId: 'ORD-2026-9001', previousStatus: 'NONE', newStatus: 'PENDING_PAYMENT', actor: { userId: 'cust-101', role: 'CUSTOMER', name: 'Abebe Bikila' }, timestamp: '2026-09-13T10:00:00.000Z', notes: 'Order created with locked pricing and body measurement snapshot.' },
-        { historyId: 'h-2', orderId: 'ORD-2026-9001', previousStatus: 'PENDING_PAYMENT', newStatus: 'PAID', actor: { userId: 'cust-101', role: 'CUSTOMER', name: 'Abebe Bikila' }, timestamp: '2026-09-13T10:30:00.000Z', notes: 'Payment verified via Telebirr gateway' },
-        { historyId: 'h-3', orderId: 'ORD-2026-9001', previousStatus: 'PAID', newStatus: 'PENDING_TAILOR', actor: { userId: 'system', role: 'SYSTEM', name: 'Order Engine' }, timestamp: '2026-09-13T10:31:00.000Z', notes: 'Order queued in master tailor workshop queue' },
-        { historyId: 'h-4', orderId: 'ORD-2026-9001', previousStatus: 'PENDING_TAILOR', newStatus: 'ACCEPTED', actor: { userId: 'tailor-1', role: 'TAILOR', name: 'Royal Habesha Couture' }, timestamp: '2026-09-14T08:15:00.000Z', notes: 'Tailor workshop accepted order and assigned master cutter' },
-        { historyId: 'h-5', orderId: 'ORD-2026-9001', previousStatus: 'ACCEPTED', newStatus: 'MEASUREMENT_VERIFICATION', actor: { userId: 'tailor-1', role: 'TAILOR', name: 'Royal Habesha Couture' }, timestamp: '2026-09-14T14:00:00.000Z', notes: 'Verified chest and shoulder dimensions against tuxedo drafting blueprint' },
-        { historyId: 'h-6', orderId: 'ORD-2026-9001', previousStatus: 'MEASUREMENT_VERIFICATION', newStatus: 'IN_PRODUCTION', actor: { userId: 'tailor-1', role: 'TAILOR', name: 'Royal Habesha Couture' }, timestamp: '2026-09-15T06:00:00.000Z', notes: 'Wool fabric cut and assembly phase initiated' },
-      ],
-      createdAt: '2026-09-13T10:00:00.000Z',
-      updatedAt: '2026-09-15T06:00:00.000Z',
-    },
-  ];
+  return memoryOrders;
 }
 
 export async function createOrder(payload: any): Promise<{ message: string; order: Order }> {
@@ -1587,7 +1592,11 @@ export async function createOrder(payload: any): Promise<{ message: string; orde
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    if (res.ok) return await res.json();
+    if (res.ok) {
+      const data = await res.json();
+      memoryOrders = [data.order, ...memoryOrders];
+      return data;
+    }
   } catch (err) {
     console.warn('Backend API unreachable, creating local order fallback');
   }
@@ -1623,6 +1632,7 @@ export async function createOrder(payload: any): Promise<{ message: string; orde
     updatedAt: new Date().toISOString(),
   };
 
+  memoryOrders = [order, ...memoryOrders];
   return { message: 'Order created with immutable snapshots!', order };
 }
 
@@ -1640,10 +1650,25 @@ export async function updateOrderStatus(
     });
 
     const data = await res.json();
-    if (res.ok) return data;
+    if (res.ok) {
+      if (data.order) {
+        memoryOrders = memoryOrders.map(o => o.orderId === orderId ? data.order : o);
+      }
+      return data;
+    }
     return { message: data.error || 'Failed to update order status', error: data.details || data.error };
   } catch (err) {
     console.warn('Backend API unreachable, updating local order status');
+  }
+
+  const orderIndex = memoryOrders.findIndex(o => o.orderId === orderId);
+  if (orderIndex >= 0) {
+    const order = memoryOrders[orderIndex];
+    order.status = newStatus;
+    if (newStatus === 'PAID' && order.paymentInfo) {
+      order.paymentInfo.status = 'PAID';
+    }
+    memoryOrders[orderIndex] = order;
   }
 
   return { message: `Order status updated to '${newStatus}'` };
