@@ -20,7 +20,7 @@ export const Hero: React.FC<HeroProps> = ({ setActiveTab }) => {
     <section style={{ padding: '60px 0', textAlign: 'center', position: 'relative' }}>
       <div className="container" style={{ maxWidth: '1000px' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '9999px', fontSize: '0.8rem', fontWeight: '600', color: '#f59e0b', marginBottom: '20px' }}>
-          <span>🚀</span> SEWFIT Smart Custom Clothing Engine
+          <span>🚀</span> SEWFIT: Measure. Customize. Wear.
         </div>
 
         <h1 style={{ fontSize: '3.4rem', lineHeight: '1.15', marginBottom: '20px', background: 'linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>

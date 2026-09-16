@@ -168,7 +168,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               SEWFIT
             </div>
             <div style={{ fontSize: '0.625rem', color: activeRole === 'ADMIN' ? '#ef4444' : activeRole === 'TAILOR' ? '#10b981' : '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: '700' }}>
-              {activeRole === 'ADMIN' ? 'Admin Portal' : activeRole === 'TAILOR' ? 'Tailor Studio' : activeRole === 'DELIVERY_AGENT' ? 'Delivery Logistics' : 'Custom Clothing'}
+              {activeRole === 'ADMIN' ? 'Admin Portal' : activeRole === 'TAILOR' ? 'Tailor Studio' : activeRole === 'DELIVERY_AGENT' ? 'Delivery Logistics' : 'Measure. Customize. Wear.'}
             </div>
           </div>
         </div>

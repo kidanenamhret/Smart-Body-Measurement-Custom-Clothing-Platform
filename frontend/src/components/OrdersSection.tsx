@@ -64,7 +64,7 @@ export const OrdersSection: React.FC<OrdersSectionProps> = ({
       {/* Header */}
       <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h2 style={{ fontSize: '2rem', marginBottom: '8px', background: 'linear-gradient(90deg, #f59e0b, #6366f1)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <h2 style={{ fontSize: '2rem', marginBottom: '8px', color: '#f8fafc', fontWeight: '800' }}>
             📦 Bespoke Orders & Historical Snapshot Ledger
           </h2>
           <p style={{ color: '#94a3b8' }}>

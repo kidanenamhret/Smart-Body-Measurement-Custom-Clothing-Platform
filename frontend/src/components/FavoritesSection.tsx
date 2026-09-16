@@ -30,8 +30,8 @@ export const FavoritesSection: React.FC<FavoritesSectionProps> = ({
     <section style={{ padding: '32px 0' }}>
       <div style={{ marginBottom: '28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h2 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px', background: 'linear-gradient(90deg, #ec4899, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            ❤️ Your Saved Favorites
+          <h2 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px', color: '#f8fafc' }}>
+            Your Saved Styles
           </h2>
           <p style={{ color: '#94a3b8', margin: 0, fontSize: '0.95rem' }}>
             Your curated collection of favorited custom garments and master tailor workshops.

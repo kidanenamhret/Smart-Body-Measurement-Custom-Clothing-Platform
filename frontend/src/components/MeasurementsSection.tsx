@@ -203,8 +203,8 @@ export const MeasurementsSection: React.FC<MeasurementsSectionProps> = ({
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
             <span style={{ fontSize: '2rem' }}>📏</span>
-            <h2 style={{ fontSize: '2.2rem', fontWeight: '800', margin: 0, background: 'linear-gradient(90deg, #f59e0b, #ec4899, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              My Measurement Profiles
+            <h2 style={{ fontSize: '2.2rem', fontWeight: '800', margin: 0, color: '#f8fafc' }}>
+              Your Body Measurement Profiles
             </h2>
           </div>
           <p style={{ color: '#94a3b8', margin: 0, fontSize: '0.95rem', maxWidth: '720px' }}>

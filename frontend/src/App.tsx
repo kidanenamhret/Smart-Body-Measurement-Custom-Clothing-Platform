@@ -477,7 +477,7 @@ export function App() {
         }}
       >
         <div className="container">
-          <p>© 2026 SEWFIT Platform • Custom Clothing Engine with Standard Centimeter Normalization & Privacy Isolation</p>
+          <p>© 2026 SEWFIT Platform • Measure. Customize. Wear.</p>
         </div>
       </footer>
     </div>
