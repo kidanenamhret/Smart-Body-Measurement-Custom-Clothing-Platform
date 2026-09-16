@@ -67,6 +67,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   // CUSTOMER Navigation Tabs
   const customerNavItems: NavItem[] = [
     { id: 'discover', label: 'Discover' },
+    { id: 'how-it-works', label: 'How it Works' },
     { id: 'measure', label: 'Measure' },
     { id: 'customize', label: 'Customize', badge: favoriteCount > 0 ? favoriteCount : undefined },
     { id: 'order', label: 'Order', badge: cartItemCount > 0 ? cartItemCount : undefined },

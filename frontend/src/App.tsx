@@ -19,6 +19,7 @@ import { TailorDashboard } from './components/TailorDashboard';
 import { AuthModal } from './components/AuthModal';
 import { ToastContainer, ConfirmationModal, SkeletonLoader } from './components/UIComponents';
 import { JourneyBanner } from './components/JourneyBanner';
+import { HowItWorksSection } from './components/HowItWorksSection';
 import type {
   UserRole,
   Tailor,
@@ -320,6 +321,9 @@ export function App() {
                     onNavigateTab={(tab) => setActiveTab(tab)}
                   />
                 </>
+              )}
+              {activeTab === 'how-it-works' && (
+                <HowItWorksSection onNavigateTab={(tab) => setActiveTab(tab)} />
               )}
               {activeTab === 'customer-dashboard' && (
                 <CustomerDashboard
