@@ -396,7 +396,7 @@ export function App() {
               {activeTab === 'support' && <SupportSection activeRole={activeRole} />}
               {(activeTab === 'delivery' || activeTab.startsWith('delivery-') || activeTab === 'tailor-delivery') && <DeliverySection jobs={deliveryJobs} />}
               {(activeTab === 'admin' || activeTab.startsWith('admin-')) && adminMetrics && (
-                <AdminSection metrics={adminMetrics} onRefreshMetrics={reloadAdminMetrics} />
+                <AdminSection metrics={adminMetrics} onRefreshMetrics={reloadAdminMetrics} activeTab={activeTab} />
               )}
             </>
           )}

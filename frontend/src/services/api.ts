@@ -418,54 +418,81 @@ export async function fetchProducts(categoryId?: string): Promise<ClothingProduc
   return DEFAULT_PRODUCTS;
 }
 
+// ── Tailor status persistence helpers ─────────────────────────────────────
+function getTailorStatusOverrides(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sewfit_tailor_status_overrides');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return {};
+}
+
+function saveTailorStatusOverride(tailorId: string, status: string) {
+  try {
+    const overrides = getTailorStatusOverrides();
+    overrides[tailorId] = status;
+    localStorage.setItem('sewfit_tailor_status_overrides', JSON.stringify(overrides));
+  } catch (e) {}
+}
+
 export async function fetchTailors(): Promise<Tailor[]> {
+  let tailors: Tailor[] = [];
   try {
     const res = await fetch(`${API_BASE}/api/tailors`);
     if (res.ok) {
       const data = await res.json();
       if (data.tailors && data.tailors.length > 0) {
-        return data.tailors;
+        tailors = data.tailors;
       }
     }
   } catch (err) {
     console.warn('Backend API unreachable, using fallback tailors data');
   }
 
-  return [
-    {
-      id: '1',
-      businessName: 'Royal Habesha Couture',
-      description: 'Master bespoke tailors specializing in custom suits, traditional Habesha Kemis, and luxury embroidery.',
-      profileImage: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400&q=80',
-      businessAddress: 'Bole Medhanealem, Addis Ababa',
-      averageRating: 4.9,
-      reviewCount: 42,
-      services: ['Bespoke Suits', 'Traditional Dresses', 'Embroidery'],
-      verificationStatus: 'VERIFIED',
-    },
-    {
-      id: '2',
-      businessName: 'Moda Fit Atelier',
-      description: 'Precision Italian & modern tailored menswear, shirts, and custom trousers.',
-      profileImage: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&q=80',
-      businessAddress: 'Kazanchis Executive Tower, Addis Ababa',
-      averageRating: 4.8,
-      reviewCount: 28,
-      services: ['Custom Suits', 'Shirts', 'Alterations'],
-      verificationStatus: 'VERIFIED',
-    },
-    {
-      id: '3',
-      businessName: 'Stitch & Grace Studio',
-      description: 'Handcrafted evening dresses, gowns, and custom fit bridal attire.',
-      profileImage: 'https://images.unsplash.com/photo-1537832816519-689ad163238b?w=400&q=80',
-      businessAddress: 'CMC Square, Addis Ababa',
-      averageRating: 4.7,
-      reviewCount: 35,
-      services: ['Gowns', 'Bridal Attire', 'Custom Fitting'],
-      verificationStatus: 'VERIFIED',
-    },
-  ];
+  if (tailors.length === 0) {
+    tailors = [
+      {
+        id: '1',
+        businessName: 'Royal Habesha Couture',
+        description: 'Master bespoke tailors specializing in custom suits, traditional Habesha Kemis, and luxury embroidery.',
+        profileImage: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=400&q=80',
+        businessAddress: 'Bole Medhanealem, Addis Ababa',
+        averageRating: 4.9,
+        reviewCount: 42,
+        services: ['Bespoke Suits', 'Traditional Dresses', 'Embroidery'],
+        verificationStatus: 'VERIFIED',
+      },
+      {
+        id: '2',
+        businessName: 'Moda Fit Atelier',
+        description: 'Precision Italian & modern tailored menswear, shirts, and custom trousers.',
+        profileImage: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=400&q=80',
+        businessAddress: 'Kazanchis Executive Tower, Addis Ababa',
+        averageRating: 4.8,
+        reviewCount: 28,
+        services: ['Custom Suits', 'Shirts', 'Alterations'],
+        verificationStatus: 'VERIFIED',
+      },
+      {
+        id: '3',
+        businessName: 'Stitch & Grace Studio',
+        description: 'Handcrafted evening dresses, gowns, and custom fit bridal attire.',
+        profileImage: 'https://images.unsplash.com/photo-1537832816519-689ad163238b?w=400&q=80',
+        businessAddress: 'CMC Square, Addis Ababa',
+        averageRating: 4.7,
+        reviewCount: 35,
+        services: ['Gowns', 'Bridal Attire', 'Custom Fitting'],
+        verificationStatus: 'VERIFIED',
+      },
+    ];
+  }
+
+  // Apply any admin status overrides persisted in localStorage
+  const overrides = getTailorStatusOverrides();
+  return tailors.map((t) => {
+    const savedStatus = overrides[String(t.id || t._id || t.tailorId)];
+    return savedStatus ? { ...t, verificationStatus: savedStatus as any } : t;
+  });
 }
 
 export const DEFAULT_MEASUREMENT_PROFILES: MeasurementProfile[] = [
@@ -764,6 +791,45 @@ export async function updateTailorStatus(
   status: 'PENDING' | 'VERIFIED' | 'REJECTED' | 'SUSPENDED',
   reason?: string
 ): Promise<any> {
+  // ── Persist immediately to localStorage so navigation doesn't lose the change ──
+  saveTailorStatusOverride(tailorId, status);
+
+  // ── Also push a persistent notification and audit log entry ──
+  const actionLabel = status === 'VERIFIED' ? 'approved' : status === 'REJECTED' ? 'rejected' : status.toLowerCase();
+  const now = new Date().toISOString();
+  const notifId = `notif-admin-${Date.now()}`;
+  const auditId = `aud-admin-${Date.now()}`;
+
+  try {
+    // Persist notification
+    const existingNotifs = JSON.parse(localStorage.getItem('sewfit_local_notifications') || '[]');
+    existingNotifs.unshift({
+      notificationId: notifId,
+      recipientId: 'admin',
+      eventType: 'TAILOR_STATUS_CHANGED',
+      channel: 'in-app',
+      title: `Tailor ${actionLabel === 'approved' ? '✅ Approved' : '❌ ' + status}`,
+      body: `Tailor ID ${tailorId} was ${actionLabel} by Admin. ${reason ? `Reason: ${reason}` : ''}`,
+      isRead: false,
+      createdAt: now,
+    });
+    localStorage.setItem('sewfit_local_notifications', JSON.stringify(existingNotifs.slice(0, 50)));
+
+    // Persist audit log entry
+    const existingLogs = JSON.parse(localStorage.getItem('sewfit_local_audit_logs') || '[]');
+    existingLogs.unshift({
+      id: auditId,
+      actor: { userId: 'admin-1', role: 'ADMIN', name: 'SEWFIT Admin' },
+      action: status === 'VERIFIED' ? 'VERIFY_TAILOR' : 'UPDATE_TAILOR_STATUS',
+      resource: 'Tailor',
+      resourceId: tailorId,
+      timestamp: now,
+      metadata: { newStatus: status, reason: reason || 'Admin action' },
+    });
+    localStorage.setItem('sewfit_local_audit_logs', JSON.stringify(existingLogs.slice(0, 100)));
+  } catch (e) {}
+
+  // ── Try to sync with the backend ──
   try {
     const token = localStorage.getItem('sewfit_token');
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -775,13 +841,11 @@ export async function updateTailorStatus(
       body: JSON.stringify({ status, reason }),
     });
 
-    if (res.ok) {
-      return await res.json();
-    }
+    if (res.ok) return await res.json();
   } catch (err) {
-    console.warn('Error updating tailor status via API:', err);
+    console.warn('Error updating tailor status via API (saved locally):', err);
   }
-  return { message: `Tailor status updated to ${status}` };
+  return { message: `Tailor status updated to ${status} (saved locally)` };
 }
 
 export async function fetchMeasurementSessions(): Promise<MeasurementSession[]> {
@@ -1894,22 +1958,7 @@ export async function deleteAddress(addressId: string): Promise<{ message: strin
    24. CENTRALIZED NOTIFICATION SERVICE API
    ========================================== */
 
-export async function fetchNotifications(): Promise<NotificationItem[]> {
-  try {
-    const token = localStorage.getItem('sewfit_token');
-    const headers: any = {};
-    if (token) headers.Authorization = `Bearer ${token}`;
-
-    const res = await fetch(`${API_BASE}/api/notifications`, { headers });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.notifications) return data.notifications;
-    }
-  } catch (err) {
-    console.warn('Backend API unreachable, returning mock notifications list');
-  }
-
-  return [
+const FALLBACK_NOTIFICATIONS: NotificationItem[] = [
     {
       notificationId: 'notif-101',
       recipientId: 'cust-101',
@@ -1941,9 +1990,55 @@ export async function fetchNotifications(): Promise<NotificationItem[]> {
       createdAt: new Date(Date.now() - 1000 * 60 * 600).toISOString(),
     },
   ];
+
+export async function fetchNotifications(): Promise<NotificationItem[]> {
+  // Load locally-persisted notifications from admin/tailor actions first
+  let localNotifs: NotificationItem[] = [];
+  try {
+    const raw = localStorage.getItem('sewfit_local_notifications');
+    if (raw) localNotifs = JSON.parse(raw);
+  } catch (e) {}
+
+  // Load read-status overrides
+  let readIds: string[] = [];
+  try {
+    const raw = localStorage.getItem('sewfit_read_notification_ids');
+    if (raw) readIds = JSON.parse(raw);
+  } catch (e) {}
+
+  try {
+    const token = localStorage.getItem('sewfit_token');
+    const headers: any = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE}/api/notifications`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.notifications && data.notifications.length > 0) {
+        const merged = [...localNotifs, ...data.notifications];
+        return merged.map((n) => readIds.includes(n.notificationId) ? { ...n, isRead: true } : n);
+      }
+    }
+  } catch (err) {
+    console.warn('Backend API unreachable, returning local+fallback notifications');
+  }
+
+  // Merge local + fallback, apply read overrides
+  const merged = [...localNotifs, ...FALLBACK_NOTIFICATIONS];
+  return merged.map((n) => readIds.includes(n.notificationId) ? { ...n, isRead: true } : n);
 }
 
 export async function markNotificationRead(notificationId: string): Promise<{ message: string }> {
+  // Always persist read state locally so it survives navigation
+  try {
+    const raw = localStorage.getItem('sewfit_read_notification_ids');
+    const readIds: string[] = raw ? JSON.parse(raw) : [];
+    if (!readIds.includes(notificationId)) {
+      readIds.push(notificationId);
+      localStorage.setItem('sewfit_read_notification_ids', JSON.stringify(readIds));
+    }
+  } catch (e) {}
+
   try {
     const token = localStorage.getItem('sewfit_token');
     const headers: any = {};
@@ -1955,7 +2050,7 @@ export async function markNotificationRead(notificationId: string): Promise<{ me
     });
     if (res.ok) return await res.json();
   } catch (err) {
-    console.warn('Backend API unreachable, marking local notification read');
+    console.warn('Backend API unreachable, read state saved locally');
   }
 
   return { message: 'Notification marked as read' };
@@ -2239,21 +2334,14 @@ export async function updateTicketStatus(ticketId: string, status: string, resol
    ========================================== */
 
 export async function fetchAuditLogs(): Promise<AuditLogItem[]> {
+  // Load locally-persisted admin action audit entries first
+  let localLogs: AuditLogItem[] = [];
   try {
-    const token = localStorage.getItem('sewfit_token');
-    const headers: any = {};
-    if (token) headers.Authorization = `Bearer ${token}`;
+    const raw = localStorage.getItem('sewfit_local_audit_logs');
+    if (raw) localLogs = JSON.parse(raw);
+  } catch (e) {}
 
-    const res = await fetch(`${API_BASE}/api/admin/audit-logs`, { headers });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.logs) return data.logs;
-    }
-  } catch (err) {
-    console.warn('Backend API unreachable, returning mock audit log list');
-  }
-
-  return [
+  const fallbackLogs: AuditLogItem[] = [
     {
       id: 'aud-1',
       actor: { userId: 'tailor-1', role: 'TAILOR', name: 'Royal Habesha Couture' },
@@ -2270,11 +2358,11 @@ export async function fetchAuditLogs(): Promise<AuditLogItem[]> {
       resource: 'Payment',
       resourceId: 'PAY-9012',
       timestamp: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-      metadata: { provider: 'Telebirr', amount: 16500, transactionRef: 'TXN-TB-998822', secretToken: '[REDACTED_SENSITIVE_DATA]' },
+      metadata: { provider: 'Telebirr', amount: 16500, transactionRef: 'TXN-TB-998822' },
     },
     {
       id: 'aud-3',
-      actor: { userId: 'admin-1', role: 'ADMIN', name: 'Master System Admin' },
+      actor: { userId: 'admin-1', role: 'ADMIN', name: 'SEWFIT Admin' },
       action: 'VERIFY_TAILOR',
       resource: 'Tailor',
       resourceId: 'tailor-1',
@@ -2282,6 +2370,30 @@ export async function fetchAuditLogs(): Promise<AuditLogItem[]> {
       metadata: { previousStatus: 'PENDING', newStatus: 'VERIFIED' },
     },
   ];
+
+  try {
+    const token = localStorage.getItem('sewfit_token');
+    const headers: any = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE}/api/admin/audit-logs`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.logs && data.logs.length > 0) {
+        // Merge local admin actions on top of DB logs
+        const dbIds = new Set(data.logs.map((l: any) => l.id));
+        const uniqueLocal = localLogs.filter((l) => !dbIds.has(l.id));
+        return [...uniqueLocal, ...data.logs];
+      }
+    }
+  } catch (err) {
+    console.warn('Backend API unreachable, returning local+fallback audit logs');
+  }
+
+  // Merge local entries on top of fallback (deduplicated)
+  const fallbackIds = new Set(fallbackLogs.map((l) => l.id));
+  const uniqueLocal = localLogs.filter((l) => !fallbackIds.has(l.id));
+  return [...uniqueLocal, ...fallbackLogs];
 }
 
 

@@ -64,12 +64,29 @@ export const TailorDashboard: React.FC<TailorDashboardProps> = ({
     }
   };
 
-  const handleAcceptOrder = async (orderId: string) => {
+  const getNextAcceptStatus = (order: Order): OrderStatus => {
+    // State machine: MEASUREMENT_VERIFICATION → IN_PRODUCTION (not ACCEPTED)
+    if (order.status === 'MEASUREMENT_VERIFICATION') return 'IN_PRODUCTION';
+    // PAID or PENDING_TAILOR → ACCEPTED
+    return 'ACCEPTED';
+  };
+
+  const getAcceptButtonLabel = (order: Order): string => {
+    if (order.status === 'MEASUREMENT_VERIFICATION') return '▶ Start Production';
+    return '✓ Accept & Start Sewing';
+  };
+
+  const handleAcceptOrder = async (order: Order) => {
+    const orderId = order.orderId || order.id || '';
+    const nextStatus = getNextAcceptStatus(order);
+    const note = nextStatus === 'IN_PRODUCTION'
+      ? 'Measurements verified — tailor starting production'
+      : 'Tailor accepted order for production';
     setUpdatingOrderId(orderId);
     try {
-      await onUpdateStatus(orderId, 'ACCEPTED', 'Tailor accepted order for production');
+      await onUpdateStatus(orderId, nextStatus, note);
     } catch (err: any) {
-      alert(`Error accepting order: ${err.message || err}`);
+      alert(`Error updating order: ${err.message || err}`);
     } finally {
       setUpdatingOrderId(null);
     }
@@ -271,13 +288,30 @@ export const TailorDashboard: React.FC<TailorDashboardProps> = ({
                         </span>
                       </div>
 
-                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        {/* Status badge */}
+                        <span style={{
+                          padding: '4px 10px', borderRadius: '20px', fontSize: '0.72rem', fontWeight: '700',
+                          background: ord.status === 'MEASUREMENT_VERIFICATION' ? 'rgba(6,182,212,0.15)' : 'rgba(245,158,11,0.15)',
+                          color: ord.status === 'MEASUREMENT_VERIFICATION' ? '#38bdf8' : '#fbbf24',
+                          border: ord.status === 'MEASUREMENT_VERIFICATION' ? '1px solid #06b6d4' : '1px solid #f59e0b',
+                        }}>
+                          {ord.status.replace(/_/g, ' ')}
+                        </span>
                         <LoadingButton
                           isLoading={updatingOrderId === (ord.orderId || ord.id)}
-                          onClick={() => handleAcceptOrder(ord.orderId || ord.id || '')}
+                          onClick={() => handleAcceptOrder(ord)}
                         >
-                          ✓ Accept & Start Sewing
+                          {getAcceptButtonLabel(ord)}
                         </LoadingButton>
+                        <button
+                          className="btn-secondary"
+                          disabled={updatingOrderId === (ord.orderId || ord.id)}
+                          onClick={() => onUpdateStatus(ord.orderId || ord.id || '', 'REJECTED', 'Tailor rejected order')}
+                          style={{ padding: '8px 14px', fontSize: '0.825rem', color: '#f87171' }}
+                        >
+                          ✕ Reject
+                        </button>
                       </div>
                     </div>
                   </div>
