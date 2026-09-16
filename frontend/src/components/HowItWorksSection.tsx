@@ -19,65 +19,105 @@ export const HowItWorksSection: React.FC<HowItWorksSectionProps> = ({ onNavigate
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '700px', margin: '0 auto' }}>
         
         {/* Step 01 */}
-        <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '30px', borderLeft: '4px solid #f59e0b' }}>
-          <div style={{ fontSize: '3rem', fontWeight: '900', color: 'rgba(245, 158, 11, 0.2)', minWidth: '60px', textAlign: 'center' }}>
-            01
+        <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '30px', borderLeft: '4px solid #f59e0b', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1', minWidth: '250px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <div style={{ fontSize: '3rem', fontWeight: '900', color: 'rgba(245, 158, 11, 0.2)', minWidth: '60px', textAlign: 'center' }}>
+                01
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f8fafc', marginBottom: '6px' }}>Measure yourself</h3>
+                <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>Use our guided measurement system.</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f8fafc', marginBottom: '6px' }}>Measure yourself</h3>
-            <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>Use our guided measurement system.</p>
+          <div style={{ flex: '1', minWidth: '250px', height: '200px', borderRadius: '12px', overflow: 'hidden' }}>
+             {/* Replace with your actual image path */}
+            <img src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=800" alt="Measure yourself" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
           </div>
         </div>
         
         <div style={{ textAlign: 'center', color: 'rgba(245, 158, 11, 0.5)', fontSize: '1.5rem', margin: '5px 0' }}>↓</div>
 
         {/* Step 02 */}
-        <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '30px', borderLeft: '4px solid #f59e0b' }}>
-          <div style={{ fontSize: '3rem', fontWeight: '900', color: 'rgba(245, 158, 11, 0.2)', minWidth: '60px', textAlign: 'center' }}>
-            02
+        <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '30px', borderLeft: '4px solid #f59e0b', flexWrap: 'wrap', flexDirection: 'row-reverse' }}>
+          <div style={{ flex: '1', minWidth: '250px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexDirection: 'row-reverse', textAlign: 'right' }}>
+              <div style={{ fontSize: '3rem', fontWeight: '900', color: 'rgba(245, 158, 11, 0.2)', minWidth: '60px', textAlign: 'center' }}>
+                02
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f8fafc', marginBottom: '6px' }}>Choose your garment</h3>
+                <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>Select from professional tailors.</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f8fafc', marginBottom: '6px' }}>Choose your garment</h3>
-            <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>Select from professional tailors.</p>
+          <div style={{ flex: '1', minWidth: '250px', height: '200px', borderRadius: '12px', overflow: 'hidden' }}>
+             {/* Replace with your actual image path */}
+             <img src="/src/assets/step2.png" alt="Choose garment" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
           </div>
         </div>
 
         <div style={{ textAlign: 'center', color: 'rgba(245, 158, 11, 0.5)', fontSize: '1.5rem', margin: '5px 0' }}>↓</div>
 
         {/* Step 03 */}
-        <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '30px', borderLeft: '4px solid #f59e0b' }}>
-          <div style={{ fontSize: '3rem', fontWeight: '900', color: 'rgba(245, 158, 11, 0.2)', minWidth: '60px', textAlign: 'center' }}>
-            03
+        <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '30px', borderLeft: '4px solid #f59e0b', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1', minWidth: '250px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <div style={{ fontSize: '3rem', fontWeight: '900', color: 'rgba(245, 158, 11, 0.2)', minWidth: '60px', textAlign: 'center' }}>
+                03
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f8fafc', marginBottom: '6px' }}>Customize</h3>
+                <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>Choose fabric, color, fit and details.</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f8fafc', marginBottom: '6px' }}>Customize</h3>
-            <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>Choose fabric, color, fit and details.</p>
+          <div style={{ flex: '1', minWidth: '250px', height: '200px', borderRadius: '12px', overflow: 'hidden' }}>
+             {/* Replace with your actual image path */}
+             <img src="/src/assets/step3.png" alt="Customize" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
           </div>
         </div>
 
         <div style={{ textAlign: 'center', color: 'rgba(245, 158, 11, 0.5)', fontSize: '1.5rem', margin: '5px 0' }}>↓</div>
 
         {/* Step 04 */}
-        <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '30px', borderLeft: '4px solid #f59e0b' }}>
-          <div style={{ fontSize: '3rem', fontWeight: '900', color: 'rgba(245, 158, 11, 0.2)', minWidth: '60px', textAlign: 'center' }}>
-            04
+        <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '30px', borderLeft: '4px solid #f59e0b', flexWrap: 'wrap', flexDirection: 'row-reverse' }}>
+          <div style={{ flex: '1', minWidth: '250px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexDirection: 'row-reverse', textAlign: 'right' }}>
+              <div style={{ fontSize: '3rem', fontWeight: '900', color: 'rgba(245, 158, 11, 0.2)', minWidth: '60px', textAlign: 'center' }}>
+                04
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f8fafc', marginBottom: '6px' }}>Your tailor makes it</h3>
+                <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>The tailor receives your verified measurements.</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f8fafc', marginBottom: '6px' }}>Your tailor makes it</h3>
-            <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>The tailor receives your verified measurements.</p>
+          <div style={{ flex: '1', minWidth: '250px', height: '200px', borderRadius: '12px', overflow: 'hidden' }}>
+             {/* Replace with your actual image path */}
+             <img src="/src/assets/step4.jpg" alt="Tailor working" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
           </div>
         </div>
 
         <div style={{ textAlign: 'center', color: 'rgba(245, 158, 11, 0.5)', fontSize: '1.5rem', margin: '5px 0' }}>↓</div>
 
         {/* Step 05 */}
-        <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '30px', borderLeft: '4px solid #f59e0b' }}>
-          <div style={{ fontSize: '3rem', fontWeight: '900', color: 'rgba(245, 158, 11, 0.2)', minWidth: '60px', textAlign: 'center' }}>
-            05
+        <div className="glass-card" style={{ padding: '32px', borderRadius: '20px', display: 'flex', alignItems: 'center', gap: '30px', borderLeft: '4px solid #f59e0b', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1', minWidth: '250px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <div style={{ fontSize: '3rem', fontWeight: '900', color: 'rgba(245, 158, 11, 0.2)', minWidth: '60px', textAlign: 'center' }}>
+                05
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f8fafc', marginBottom: '6px' }}>Delivered to you</h3>
+                <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>Track your order from production to delivery.</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f8fafc', marginBottom: '6px' }}>Delivered to you</h3>
-            <p style={{ fontSize: '1rem', color: '#94a3b8', margin: 0 }}>Track your order from production to delivery.</p>
+          <div style={{ flex: '1', minWidth: '250px', height: '200px', borderRadius: '12px', overflow: 'hidden' }}>
+             {/* Replace with your actual image path */}
+             <img src="/src/assets/step5.jpg" alt="Delivery" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
           </div>
         </div>
 
