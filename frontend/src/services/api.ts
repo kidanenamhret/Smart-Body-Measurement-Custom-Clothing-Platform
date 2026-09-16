@@ -2072,7 +2072,6 @@ export const DEFAULT_SUPPORT_TICKETS: SupportTicketItem[] = [
       updatedAt: '2026-09-14T11:30:00.000Z',
     },
   ];
-}
 
 function getLocalSupportTickets(): SupportTicketItem[] {
   try {
