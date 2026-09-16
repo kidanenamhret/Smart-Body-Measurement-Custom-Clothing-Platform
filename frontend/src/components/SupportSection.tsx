@@ -106,18 +106,19 @@ export const SupportSection: React.FC<SupportSectionProps> = ({ activeRole }) =>
 
   return (
     <section className="py-8 space-y-6">
-      <div className="flex justify-between items-end flex-wrap gap-4 border-b border-slate-800 pb-4">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '16px', marginBottom: '24px' }}>
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'white', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
             <span>🎧</span> Customer Support & Dispute Resolution Desk
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
+          <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px', marginBottom: 0 }}>
             Track inquiries, order custom fit adjustments, payment issues, and live agent dispute resolution
           </p>
         </div>
         <button
           onClick={() => setShowNewModal(true)}
-          className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs rounded-xl transition shadow-lg flex items-center gap-1.5"
+          className="btn-primary"
+          style={{ fontSize: '0.75rem', padding: '8px 16px' }}
         >
           <span>+</span> Open Support Ticket
         </button>
@@ -126,10 +127,10 @@ export const SupportSection: React.FC<SupportSectionProps> = ({ activeRole }) =>
       {loading ? (
         <div className="py-12 text-center text-slate-400 text-sm">Loading support tickets...</div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px' }}>
           {/* Ticket Queue List */}
-          <div className="lg:col-span-1 space-y-3">
-            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">
+          <div style={{ flex: '1 1 300px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <h3 style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
               Tickets List ({tickets.length})
             </h3>
 
@@ -141,42 +142,46 @@ export const SupportSection: React.FC<SupportSectionProps> = ({ activeRole }) =>
               tickets.map((t) => {
                 const isSel = selectedTicket?.ticketNumber === t.ticketNumber;
                 return (
-                  <button
+                  <div
                     key={t.ticketNumber}
                     onClick={() => setSelectedTicket(t)}
-                    className={`w-full p-4 rounded-xl border text-left transition ${
-                      isSel
-                        ? 'bg-slate-800 border-amber-400/80 ring-1 ring-amber-400/30'
-                        : 'bg-slate-900/60 border-slate-800 hover:bg-slate-850'
-                    }`}
+                    className="glass-card"
+                    style={{
+                      cursor: 'pointer',
+                      padding: '16px',
+                      textAlign: 'left',
+                      borderColor: isSel ? 'rgba(245, 158, 11, 0.8)' : 'rgba(255, 255, 255, 0.08)',
+                      background: isSel ? 'rgba(30, 41, 59, 0.8)' : 'rgba(15, 23, 42, 0.6)',
+                      boxShadow: isSel ? '0 0 0 1px rgba(245, 158, 11, 0.3)' : 'none'
+                    }}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-xs font-mono font-bold text-amber-400">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', fontWeight: 'bold', color: '#fcd34d' }}>
                         #{t.ticketNumber}
                       </span>
-                      <div className="flex gap-1.5">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${getPriorityBadgeStyle(t.priority)}`}>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <span className="badge" style={{ fontSize: '10px' }}>
                           {t.priority}
                         </span>
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${getStatusBadgeStyle(t.status)}`}>
+                        <span className="badge badge-gold" style={{ fontSize: '10px' }}>
                           {t.status}
                         </span>
                       </div>
                     </div>
-                    <h4 className="text-sm font-semibold text-white line-clamp-1">{t.subject}</h4>
-                    <p className="text-xs text-slate-400 mt-1 line-clamp-2">{t.description}</p>
-                    <div className="mt-3 text-[10px] text-slate-500 flex justify-between">
+                    <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: 'white', margin: '0 0 4px 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.subject}</h4>
+                    <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t.description}</p>
+                    <div style={{ marginTop: '12px', fontSize: '10px', color: '#64748b', display: 'flex', justifyContent: 'space-between' }}>
                       <span>Category: {t.type}</span>
                       <span>{new Date(t.createdAt).toLocaleDateString()}</span>
                     </div>
-                  </button>
+                  </div>
                 );
               })
             )}
           </div>
 
           {/* Ticket Thread & Message Window */}
-          <div className="lg:col-span-2">
+          <div style={{ flex: '2 1 500px' }}>
             {!selectedTicket ? (
               <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-12 text-center text-slate-500 text-sm">
                 Select a support ticket from the list to view live message thread and post replies.
