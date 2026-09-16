@@ -1,4 +1,4 @@
-import type { Tailor, ClothingProduct, ClothingCategory, MeasurementProfile, DeliveryJob, AdminMetrics, MeasurementSession, MeasurementSessionStatus, MeasurementValidationResult, PriceCalculationResult, FavoriteItem, CartData, Order, OrderStatus, TailorProductionStage, PaymentRecord, PaymentProvider, CustomerAddress, NotificationItem, ReviewItem, SupportTicketItem, AuditLogItem } from '../types';
+import type { Tailor, ClothingProduct, ClothingCategory, MeasurementProfile, AdminMetrics, MeasurementSession, MeasurementSessionStatus, MeasurementValidationResult, PriceCalculationResult, FavoriteItem, CartData, Order, OrderStatus, TailorProductionStage, PaymentRecord, PaymentProvider, CustomerAddress, NotificationItem, ReviewItem, SupportTicketItem, AuditLogItem } from '../types';
 
 const API_BASE = 'http://localhost:3001';
 
@@ -490,7 +490,7 @@ export async function fetchTailors(): Promise<Tailor[]> {
   // Apply any admin status overrides persisted in localStorage
   const overrides = getTailorStatusOverrides();
   return tailors.map((t) => {
-    const savedStatus = overrides[String(t.id || t._id || t.tailorId)];
+    const savedStatus = overrides[String(t.id || '')];
     return savedStatus ? { ...t, verificationStatus: savedStatus as any } : t;
   });
 }
@@ -698,40 +698,121 @@ export async function setDefaultMeasurementProfile(profileId: string): Promise<M
   return updated;
 }
 
-export async function fetchDeliveryJobs(): Promise<DeliveryJob[]> {
-  return [
-    {
-      id: 'JOB-9021',
-      status: 'AVAILABLE',
-      pickupInfo: {
-        businessName: 'Royal Habesha Couture',
-        address: 'Bole Medhanealem Workshop #402, Addis Ababa',
-        contactPhone: '+251 91 123 4567',
-      },
-      deliveryInfo: {
-        recipientName: 'Abebe Bikila',
-        address: 'Kazanchis Residence Tower, Apt 7B',
-        contactPhone: '+251 92 888 9900',
-      },
-      createdAt: '2026-09-15 06:30',
-    },
-    {
-      id: 'JOB-9022',
-      status: 'EN_ROUTE_TO_CUSTOMER',
-      pickupInfo: {
-        businessName: 'Moda Fit Atelier',
-        address: 'Kazanchis Executive Tower Studio',
-        contactPhone: '+251 93 456 7890',
-      },
-      deliveryInfo: {
-        recipientName: 'Tigist Lemma',
-        address: 'Sarbet Old Airport Area, Villa 45',
-        contactPhone: '+251 91 777 3344',
-      },
-      createdAt: '2026-09-15 05:15',
-    },
-  ];
+// ── Delivery job persistence helpers ───────────────────────────────────────
+
+type DeliveryJobStatus = 'AVAILABLE' | 'ACCEPTED' | 'PICKED_UP' | 'EN_ROUTE_TO_CUSTOMER' | 'DELIVERED' | 'FAILED';
+
+interface DeliveryJob {
+  id: string;
+  status: DeliveryJobStatus | string;
+  pickupInfo: { businessName: string; address: string; contactPhone: string };
+  deliveryInfo: { recipientName: string; address: string; contactPhone: string };
+  createdAt: string;
 }
+
+const DEFAULT_DELIVERY_JOBS: DeliveryJob[] = [
+  {
+    id: 'JOB-9021',
+    status: 'AVAILABLE',
+    pickupInfo: {
+      businessName: 'Royal Habesha Couture',
+      address: 'Bole Medhanealem Workshop #402, Addis Ababa',
+      contactPhone: '+251 91 123 4567',
+    },
+    deliveryInfo: {
+      recipientName: 'Abebe Bikila',
+      address: 'Kazanchis Residence Tower, Apt 7B',
+      contactPhone: '+251 92 888 9900',
+    },
+    createdAt: '2026-09-15 06:30',
+  },
+  {
+    id: 'JOB-9022',
+    status: 'EN_ROUTE_TO_CUSTOMER',
+    pickupInfo: {
+      businessName: 'Moda Fit Atelier',
+      address: 'Kazanchis Executive Tower Studio',
+      contactPhone: '+251 93 456 7890',
+    },
+    deliveryInfo: {
+      recipientName: 'Tigist Lemma',
+      address: 'Sarbet Old Airport Area, Villa 45',
+      contactPhone: '+251 91 777 3344',
+    },
+    createdAt: '2026-09-15 05:15',
+  },
+];
+
+function getDeliveryJobOverrides(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sewfit_delivery_job_overrides');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return {};
+}
+
+export function saveDeliveryJobStatus(jobId: string, status: string) {
+  try {
+    const overrides = getDeliveryJobOverrides();
+    overrides[jobId] = status;
+    localStorage.setItem('sewfit_delivery_job_overrides', JSON.stringify(overrides));
+
+    const JOB_LABELS: Record<string, string> = {
+      ACCEPTED: '📦 Delivery Job Accepted',
+      PICKED_UP: '🚛 Package Picked Up',
+      EN_ROUTE_TO_CUSTOMER: '🚚 En Route to Customer',
+      DELIVERED: '✅ Package Delivered!',
+      FAILED: '❌ Delivery Failed',
+    };
+    const notifs = JSON.parse(localStorage.getItem('sewfit_local_notifications') || '[]');
+    notifs.unshift({
+      notificationId: `notif-delivery-${Date.now()}`,
+      recipientId: 'all',
+      eventType: 'DELIVERY_STATUS_CHANGED',
+      channel: 'in-app',
+      title: JOB_LABELS[status] || `Delivery: ${status}`,
+      body: `Job #${jobId} updated to ${status.replace(/_/g, ' ')}.`,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+    localStorage.setItem('sewfit_local_notifications', JSON.stringify(notifs.slice(0, 50)));
+
+    const logs = JSON.parse(localStorage.getItem('sewfit_local_audit_logs') || '[]');
+    logs.unshift({
+      id: `aud-delivery-${Date.now()}`,
+      actor: { userId: 'delivery-1', role: 'DELIVERY_AGENT', name: 'Delivery Agent' },
+      action: 'UPDATE_DELIVERY_STATUS',
+      resource: 'DeliveryJob',
+      resourceId: jobId,
+      timestamp: new Date().toISOString(),
+      metadata: { newStatus: status },
+    });
+    localStorage.setItem('sewfit_local_audit_logs', JSON.stringify(logs.slice(0, 100)));
+  } catch (e) {}
+}
+
+export async function fetchDeliveryJobs(): Promise<DeliveryJob[]> {
+  let jobs: DeliveryJob[] = DEFAULT_DELIVERY_JOBS;
+  try {
+    const token = localStorage.getItem('sewfit_token');
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(`${API_BASE}/api/delivery/jobs`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.jobs && data.jobs.length > 0) jobs = data.jobs;
+    }
+  } catch (err) {
+    console.warn('Backend API unreachable, using local delivery jobs');
+  }
+
+  const overrides = getDeliveryJobOverrides();
+  return jobs.map((j) =>
+    overrides[j.id] ? { ...j, status: overrides[j.id] } : j
+  );
+}
+
+
 
 export async function fetchAdminMetrics(): Promise<AdminMetrics> {
   try {
@@ -1599,7 +1680,55 @@ export async function removeFromCart(productId: string): Promise<{ message: stri
   return { message: 'Item removed from cart', cart: currentCart };
 }
 
-let memoryOrders: Order[] = [
+// ── Order persistence helpers (all roles) ──────────────────────────────────
+function getOrdersStore(): Order[] {
+  try {
+    const raw = localStorage.getItem('sewfit_orders_store');
+    if (raw) {
+      const parsed: Order[] = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  return [];
+}
+
+function setOrdersStore(orders: Order[]) {
+  try { localStorage.setItem('sewfit_orders_store', JSON.stringify(orders)); } catch (e) {}
+}
+
+function getOrderStatusOverrides(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sewfit_order_status_overrides');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return {};
+}
+
+function saveOrderStatusOverride(orderId: string, status: string, productionStage?: string) {
+  try {
+    const overrides = getOrderStatusOverrides();
+    overrides[orderId] = JSON.stringify({ status, productionStage });
+    localStorage.setItem('sewfit_order_status_overrides', JSON.stringify(overrides));
+  } catch (e) {}
+}
+
+function applyOrderOverrides(orders: Order[]): Order[] {
+  const overrides = getOrderStatusOverrides();
+  return orders.map((o) => {
+    const raw = overrides[o.orderId || o.id || ''];
+    if (!raw) return o;
+    try {
+      const { status, productionStage } = JSON.parse(raw);
+      return {
+        ...o,
+        status: status || o.status,
+        productionStage: productionStage || o.productionStage,
+      };
+    } catch { return o; }
+  });
+}
+
+const DEFAULT_FALLBACK_ORDERS: Order[] = [
   {
     orderId: 'ORD-2026-9001',
     customerId: 'cust-101',
@@ -1637,16 +1766,24 @@ export async function fetchOrders(): Promise<Order[]> {
     const res = await fetch(`${API_BASE}/api/orders`, { headers });
     if (res.ok) {
       const data = await res.json();
-      if (data.orders) {
-        memoryOrders = data.orders;
-        return data.orders;
+      if (data.orders && data.orders.length > 0) {
+        // Merge DB orders with any locally-created orders
+        const localOrders = getOrdersStore();
+        const dbIds = new Set(data.orders.map((o: Order) => o.orderId));
+        const localOnly = localOrders.filter((o) => !dbIds.has(o.orderId));
+        const merged = [...localOnly, ...data.orders];
+        setOrdersStore(merged);
+        return applyOrderOverrides(merged);
       }
     }
   } catch (err) {
-    console.warn('Backend API unreachable, returning mock orders');
+    console.warn('Backend API unreachable, returning local orders');
   }
 
-  return memoryOrders;
+  // Use localStorage store, fall back to default orders if empty
+  const stored = getOrdersStore();
+  const base = stored.length > 0 ? stored : DEFAULT_FALLBACK_ORDERS;
+  return applyOrderOverrides(base);
 }
 
 export async function createOrder(payload: any): Promise<{ message: string; order: Order }> {
@@ -1658,7 +1795,10 @@ export async function createOrder(payload: any): Promise<{ message: string; orde
     });
     if (res.ok) {
       const data = await res.json();
-      memoryOrders = [data.order, ...memoryOrders];
+      const stored = getOrdersStore();
+      const merged = [data.order, ...stored.filter((o: Order) => o.orderId !== data.order.orderId)];
+      setOrdersStore(merged);
+      saveOrderStatusOverride(data.order.orderId, data.order.status);
       return data;
     }
   } catch (err) {
@@ -1696,7 +1836,27 @@ export async function createOrder(payload: any): Promise<{ message: string; orde
     updatedAt: new Date().toISOString(),
   };
 
-  memoryOrders = [order, ...memoryOrders];
+  // Persist new order to localStorage so it survives navigation
+  const stored = getOrdersStore();
+  const merged = [order, ...stored];
+  setOrdersStore(merged);
+
+  // Log notification for order creation
+  try {
+    const notifs = JSON.parse(localStorage.getItem('sewfit_local_notifications') || '[]');
+    notifs.unshift({
+      notificationId: `notif-order-${Date.now()}`,
+      recipientId: order.customerId,
+      eventType: 'ORDER_CREATED',
+      channel: 'in-app',
+      title: `📦 Order Placed — ${order.orderId}`,
+      body: `Your order for "${order.productSnapshot?.name || 'Custom Garment'}" has been submitted. Complete payment to start production.`,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+    localStorage.setItem('sewfit_local_notifications', JSON.stringify(notifs.slice(0, 50)));
+  } catch (e) {}
+
   return { message: 'Order created with immutable snapshots!', order };
 }
 
@@ -1706,36 +1866,86 @@ export async function updateOrderStatus(
   actorRole: string = 'TAILOR',
   notes?: string
 ): Promise<{ message: string; order?: Order; error?: string }> {
+  // ── Persist immediately to localStorage (all roles) ──
+  saveOrderStatusOverride(orderId, newStatus);
+
+  // ── Persist notification for the status change ──
   try {
+    const STATUS_LABELS: Record<string, string> = {
+      ACCEPTED: '✅ Order Accepted by Tailor',
+      IN_PRODUCTION: '🧵 Production Started',
+      QUALITY_CHECK: '🔍 Quality Check Underway',
+      READY_FOR_PICKUP: '📫 Ready for Pickup',
+      OUT_FOR_DELIVERY: '🚚 Out for Delivery',
+      DELIVERED: '🎉 Order Delivered!',
+      REJECTED: '❌ Order Rejected',
+      CANCELLED: '🚫 Order Cancelled',
+      PAID: '💳 Payment Confirmed',
+      MEASUREMENT_VERIFICATION: '📏 Measurements Under Review',
+    };
+    const title = STATUS_LABELS[newStatus] || `Order status: ${newStatus.replace(/_/g, ' ')}`;
+    const notifs = JSON.parse(localStorage.getItem('sewfit_local_notifications') || '[]');
+    notifs.unshift({
+      notificationId: `notif-status-${Date.now()}`,
+      recipientId: 'all',
+      eventType: 'ORDER_STATUS_CHANGED',
+      channel: 'in-app',
+      title,
+      body: `Order #${orderId} was updated to ${newStatus.replace(/_/g, ' ')} by ${actorRole}. ${notes || ''}`.trim(),
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+    localStorage.setItem('sewfit_local_notifications', JSON.stringify(notifs.slice(0, 50)));
+
+    // Audit log
+    const logs = JSON.parse(localStorage.getItem('sewfit_local_audit_logs') || '[]');
+    logs.unshift({
+      id: `aud-order-${Date.now()}`,
+      actor: { userId: actorRole.toLowerCase() + '-1', role: actorRole, name: actorRole },
+      action: 'UPDATE_ORDER_STATUS',
+      resource: 'Order',
+      resourceId: orderId,
+      timestamp: new Date().toISOString(),
+      metadata: { newStatus, notes: notes || '' },
+    });
+    localStorage.setItem('sewfit_local_audit_logs', JSON.stringify(logs.slice(0, 100)));
+  } catch (e) {}
+
+  // Also update localStorage orders store directly
+  try {
+    const stored = getOrdersStore();
+    const idx = stored.findIndex((o) => o.orderId === orderId);
+    if (idx >= 0) {
+      stored[idx] = {
+        ...stored[idx],
+        status: newStatus,
+        updatedAt: new Date().toISOString(),
+        paymentInfo: newStatus === 'PAID' ? { ...stored[idx].paymentInfo, status: 'PAID' } as any : stored[idx].paymentInfo,
+      };
+      setOrdersStore(stored);
+    }
+  } catch (e) {}
+
+  // ── Try backend sync ──
+  try {
+    const token = localStorage.getItem('sewfit_token');
+    const headers: any = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
     const res = await fetch(`${API_BASE}/api/orders/${orderId}/status`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ newStatus, actorRole, notes }),
     });
 
     const data = await res.json();
-    if (res.ok) {
-      if (data.order) {
-        memoryOrders = memoryOrders.map(o => o.orderId === orderId ? data.order : o);
-      }
-      return data;
-    }
+    if (res.ok) return data;
     return { message: data.error || 'Failed to update order status', error: data.details || data.error };
   } catch (err) {
-    console.warn('Backend API unreachable, updating local order status');
+    console.warn('Backend API unreachable, order status saved locally');
   }
 
-  const orderIndex = memoryOrders.findIndex(o => o.orderId === orderId);
-  if (orderIndex >= 0) {
-    const order = memoryOrders[orderIndex];
-    order.status = newStatus;
-    if (newStatus === 'PAID' && order.paymentInfo) {
-      order.paymentInfo.status = 'PAID';
-    }
-    memoryOrders[orderIndex] = order;
-  }
-
-  return { message: `Order status updated to '${newStatus}'` };
+  return { message: `Order status updated to '${newStatus}' (saved locally)` };
 }
 
 export async function updateProductionStage(
@@ -1743,10 +1953,67 @@ export async function updateProductionStage(
   productionStage: TailorProductionStage,
   notes?: string
 ): Promise<{ message: string; order?: Order; error?: string }> {
+  // ── Persist stage immediately ──
   try {
+    // Read current override and merge stage into it
+    const overrides = getOrderStatusOverrides();
+    const existing = overrides[orderId] ? JSON.parse(overrides[orderId]) : {};
+    overrides[orderId] = JSON.stringify({ ...existing, productionStage });
+    localStorage.setItem('sewfit_order_status_overrides', JSON.stringify(overrides));
+
+    // Also update orders store
+    const stored = getOrdersStore();
+    const idx = stored.findIndex((o) => o.orderId === orderId);
+    if (idx >= 0) {
+      stored[idx] = { ...stored[idx], productionStage, updatedAt: new Date().toISOString() };
+      setOrdersStore(stored);
+    }
+
+    // Notification for tailor stage progress
+    const STAGE_LABELS: Record<string, string> = {
+      MEASUREMENT_VERIFIED: '📏 Measurements Verified',
+      CUTTING: '✂️ Fabric Cutting Started',
+      SEWING: '🧵 Sewing in Progress',
+      FINISHING: '🪡 Final Finishing',
+      QUALITY_CHECK: '🔍 Quality Inspection',
+      READY: '✅ Garment Ready!',
+    };
+    const notifs = JSON.parse(localStorage.getItem('sewfit_local_notifications') || '[]');
+    notifs.unshift({
+      notificationId: `notif-stage-${Date.now()}`,
+      recipientId: 'all',
+      eventType: 'PRODUCTION_STAGE_UPDATED',
+      channel: 'in-app',
+      title: STAGE_LABELS[productionStage] || `Stage: ${productionStage}`,
+      body: `Order #${orderId} production advanced to ${productionStage.replace(/_/g, ' ')}. ${notes || ''}`.trim(),
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+    localStorage.setItem('sewfit_local_notifications', JSON.stringify(notifs.slice(0, 50)));
+
+    // Audit log
+    const logs = JSON.parse(localStorage.getItem('sewfit_local_audit_logs') || '[]');
+    logs.unshift({
+      id: `aud-stage-${Date.now()}`,
+      actor: { userId: 'tailor-1', role: 'TAILOR', name: 'Master Tailor' },
+      action: 'UPDATE_PRODUCTION_STAGE',
+      resource: 'Order',
+      resourceId: orderId,
+      timestamp: new Date().toISOString(),
+      metadata: { productionStage, notes: notes || '' },
+    });
+    localStorage.setItem('sewfit_local_audit_logs', JSON.stringify(logs.slice(0, 100)));
+  } catch (e) {}
+
+  // ── Try backend sync ──
+  try {
+    const token = localStorage.getItem('sewfit_token');
+    const headers: any = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
     const res = await fetch(`${API_BASE}/api/orders/${orderId}/production-stage`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ productionStage, notes }),
     });
 
@@ -1754,10 +2021,10 @@ export async function updateProductionStage(
     if (res.ok) return data;
     return { message: data.error || 'Failed to update production stage', error: data.details || data.error };
   } catch (err) {
-    console.warn('Backend API unreachable, updating local production stage');
+    console.warn('Backend API unreachable, production stage saved locally');
   }
 
-  return { message: `Production stage updated to '${productionStage}'` };
+  return { message: `Production stage updated to '${productionStage}' (saved locally)` };
 }
 
 /* ==========================================

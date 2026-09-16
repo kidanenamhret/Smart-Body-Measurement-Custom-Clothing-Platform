@@ -7,7 +7,6 @@ import {
   updateTailorStatus,
   fetchOrders,
   fetchProducts,
-  updateOrderStatus,
 } from '../services/api';
 import { SkeletonLoader, LoadingButton } from './UIComponents';
 

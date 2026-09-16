@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { DeliveryJob } from '../types';
+import { saveDeliveryJobStatus } from '../services/api';
 
 interface DeliverySectionProps {
   jobs: DeliveryJob[];
@@ -9,6 +10,8 @@ export const DeliverySection: React.FC<DeliverySectionProps> = ({ jobs: initialJ
   const [jobs, setJobs] = useState<DeliveryJob[]>(initialJobs);
 
   const handleUpdateStatus = (jobId: string, newStatus: string) => {
+    // Persist immediately so navigation doesn't lose this change
+    saveDeliveryJobStatus(jobId, newStatus);
     setJobs((prev) =>
       prev.map((j) => (j.id === jobId ? { ...j, status: newStatus } : j))
     );

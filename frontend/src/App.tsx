@@ -423,6 +423,17 @@ export function App() {
           setPaymentModalOrder(null);
         }}
         onPaymentSuccess={async () => {
+          if (paymentModalOrder) {
+            await updateOrderStatus(
+              paymentModalOrder.orderId,
+              'PAID',
+              'SYSTEM',
+              'Payment verified via gateway'
+            );
+            // Refresh orders to reflect the PAID state in the UI immediately
+            const updated = await fetchOrders();
+            setOrders(updated);
+          }
           setIsPaymentModalOpen(false);
           setPaymentModalOrder(null);
           showToast('success', 'Payment Received', 'Transaction processed successfully');
