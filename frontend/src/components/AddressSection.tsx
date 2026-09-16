@@ -82,79 +82,85 @@ export const AddressSection: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-      <div className="flex justify-between items-center border-b border-slate-800 pb-4">
+    <div className="glass-card" style={{ padding: '32px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '20px', marginBottom: '24px' }}>
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
             <span>📍</span> Delivery Address Book
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
             Manage your tailored garment delivery locations with privacy isolation
           </p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-semibold rounded-xl text-xs transition shadow-lg flex items-center gap-1.5"
+          className="btn-primary"
+          style={{ padding: '8px 16px', fontSize: '0.85rem' }}
         >
           <span>+</span> Add New Address
         </button>
       </div>
 
       {loading ? (
-        <div className="py-8 text-center text-slate-400 text-sm">Loading address book...</div>
+        <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading address book...</div>
       ) : addresses.length === 0 ? (
-        <div className="py-8 text-center text-slate-400 text-sm">
+        <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)' }}>
           No saved addresses found. Click "Add New Address" above to save a delivery address.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
           {addresses.map((addr) => {
             const addrId = addr.id || addr._id || addr.addressId;
             return (
               <div
                 key={addrId}
-                className={`p-4 rounded-xl border transition relative flex flex-col justify-between ${
-                  addr.isDefault
-                    ? 'bg-slate-800/90 border-amber-500/50 shadow-lg shadow-amber-500/5'
-                    : 'bg-slate-800/40 border-slate-700/50 hover:bg-slate-800/70'
-                }`}
+                style={{
+                  padding: '20px',
+                  borderRadius: '16px',
+                  border: addr.isDefault ? '1px solid var(--primary-gold)' : '1px solid var(--border-color)',
+                  background: addr.isDefault ? 'rgba(245, 158, 11, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  transition: 'all 0.2s ease'
+                }}
               >
                 <div>
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-700 text-amber-400 uppercase tracking-wider">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                    <span className="badge badge-cyan">
                       {addr.label}
                     </span>
                     {addr.isDefault ? (
-                      <span className="text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-medium">
+                      <span className="badge badge-gold" style={{ fontSize: '10px' }}>
                         ★ Default Address
                       </span>
                     ) : (
                       <button
                         onClick={() => handleSetDefault(addrId)}
-                        className="text-[11px] text-slate-400 hover:text-amber-400 underline"
+                        style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
                       >
                         Set as Default
                       </button>
                     )}
                   </div>
 
-                  <h3 className="font-semibold text-white text-sm">{addr.recipientName}</h3>
-                  <p className="text-xs text-slate-300 mt-1">{addr.street}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <h3 style={{ fontWeight: '600', color: 'var(--text-main)', fontSize: '1rem', margin: '0 0 4px 0' }}>{addr.recipientName}</h3>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-main)', margin: '0 0 2px 0' }}>{addr.street}</p>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 2px 0' }}>
                     {addr.subCity ? `${addr.subCity}, ` : ''}{addr.city}, {addr.region}
                   </p>
-                  <p className="text-xs text-slate-400 mt-0.5">Phone: {addr.phone}</p>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '0 0 8px 0' }}>Phone: {addr.phone}</p>
                   {addr.additionalInformation && (
-                    <p className="text-[11px] text-slate-500 italic mt-2">
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontStyle: 'italic', margin: 0 }}>
                       "{addr.additionalInformation}"
                     </p>
                   )}
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-700/50 flex justify-end gap-3">
+                <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end' }}>
                   <button
                     onClick={() => handleDelete(addrId)}
-                    className="text-xs text-red-400 hover:text-red-300 transition"
+                    style={{ fontSize: '0.8rem', color: 'var(--color-danger)', background: 'none', border: 'none', cursor: 'pointer' }}
                   >
                     Delete
                   </button>
@@ -167,137 +173,139 @@ export const AddressSection: React.FC = () => {
 
       {/* Add Address Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white">Add Delivery Address</h3>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', padding: '20px' }}>
+          <div className="glass-card" style={{ width: '100%', maxWidth: '500px', padding: '32px', background: 'var(--bg-surface)', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '20px' }}>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: 0 }}>Add Delivery Address</h3>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="text-slate-400 hover:text-white"
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem' }}
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleAddSubmit} className="space-y-3 text-xs">
+            <form onSubmit={handleAddSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '0.9rem' }}>
               <div>
-                <label className="block text-slate-400 mb-1">Address Label</label>
+                <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '6px' }}>Address Label</label>
                 <select
                   value={formData.label}
                   onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px', color: 'var(--text-main)' }}
                 >
-                  <option value="Home">Home</option>
-                  <option value="Office">Office</option>
-                  <option value="Studio">Studio</option>
-                  <option value="Other">Other</option>
+                  <option style={{ color: '#000' }} value="Home">Home</option>
+                  <option style={{ color: '#000' }} value="Office">Office</option>
+                  <option style={{ color: '#000' }} value="Studio">Studio</option>
+                  <option style={{ color: '#000' }} value="Other">Other</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Recipient Name *</label>
+                <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '6px' }}>Recipient Name *</label>
                 <input
                   type="text"
                   required
                   value={formData.recipientName}
                   onChange={(e) => setFormData({ ...formData, recipientName: e.target.value })}
                   placeholder="Full name for delivery contact"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px', color: 'var(--text-main)', boxSizing: 'border-box' }}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label className="block text-slate-400 mb-1">Phone Number *</label>
+                  <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '6px' }}>Phone Number *</label>
                   <input
                     type="text"
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+251 9..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px', color: 'var(--text-main)', boxSizing: 'border-box' }}
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-400 mb-1">City *</label>
+                  <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '6px' }}>City *</label>
                   <input
                     type="text"
                     required
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px', color: 'var(--text-main)', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                  <label className="block text-slate-400 mb-1">SubCity</label>
+                  <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '6px' }}>SubCity</label>
                   <input
                     type="text"
                     value={formData.subCity}
                     onChange={(e) => setFormData({ ...formData, subCity: e.target.value })}
                     placeholder="e.g. Bole, Kirkos"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px', color: 'var(--text-main)', boxSizing: 'border-box' }}
                   />
                 </div>
                 <div>
-                  <label className="block text-slate-400 mb-1">Woreda</label>
+                  <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '6px' }}>Woreda</label>
                   <input
                     type="text"
                     value={formData.woreda}
                     onChange={(e) => setFormData({ ...formData, woreda: e.target.value })}
                     placeholder="e.g. 03"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px', color: 'var(--text-main)', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Street Address *</label>
+                <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '6px' }}>Street Address *</label>
                 <input
                   type="text"
                   required
                   value={formData.street}
                   onChange={(e) => setFormData({ ...formData, street: e.target.value })}
                   placeholder="Building name, street, apartment number"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px', color: 'var(--text-main)', boxSizing: 'border-box' }}
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Additional Delivery Notes</label>
+                <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '6px' }}>Additional Delivery Notes</label>
                 <input
                   type="text"
                   value={formData.additionalInformation}
                   onChange={(e) => setFormData({ ...formData, additionalInformation: e.target.value })}
                   placeholder="Landmarks or delivery instructions"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px', color: 'var(--text-main)', boxSizing: 'border-box' }}
                 />
               </div>
 
-              <div className="flex items-center gap-2 pt-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
                 <input
                   type="checkbox"
                   id="isDefault"
                   checked={formData.isDefault}
                   onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
-                  className="rounded bg-slate-950 border-slate-800 text-amber-400 focus:ring-amber-400"
+                  style={{ cursor: 'pointer' }}
                 />
-                <label htmlFor="isDefault" className="text-slate-300">Set as default delivery address</label>
+                <label htmlFor="isDefault" style={{ color: 'var(--text-muted)', cursor: 'pointer' }}>Set as default delivery address</label>
               </div>
 
-              <div className="pt-4 flex justify-end gap-2">
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px' }}>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-3 py-1.5 text-slate-400 hover:text-white"
+                  className="btn-secondary"
+                  style={{ padding: '8px 16px', fontSize: '0.9rem' }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg"
+                  className="btn-primary"
+                  style={{ padding: '8px 16px', fontSize: '0.9rem' }}
                 >
                   Save Address
                 </button>

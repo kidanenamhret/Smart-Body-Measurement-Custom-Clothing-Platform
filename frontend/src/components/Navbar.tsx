@@ -64,36 +64,41 @@ export const Navbar: React.FC<NavbarProps> = ({
     badge?: number;
   }
 
-  // Recommended Customer Navigation Tabs
+  // CUSTOMER Navigation Tabs
   const customerNavItems: NavItem[] = [
-    { id: 'hero', label: 'Home' },
-    { id: 'catalog', label: 'Garments' },
-    { id: 'tailors', label: 'Tailors' },
-    { id: 'measurements', label: 'My Measurements' },
-    { id: 'orders', label: 'My Orders', badge: orderCount > 0 ? orderCount : undefined },
-    { id: 'favorites', label: 'Favorites', badge: favoriteCount > 0 ? favoriteCount : undefined },
+    { id: 'discover', label: 'Discover' },
+    { id: 'measure', label: 'Measure' },
+    { id: 'customize', label: 'Customize', badge: favoriteCount > 0 ? favoriteCount : undefined },
+    { id: 'order', label: 'Order', badge: cartItemCount > 0 ? cartItemCount : undefined },
+    { id: 'track', label: 'Track', badge: orderCount > 0 ? orderCount : undefined },
   ];
 
-  // Tailor Studio Navigation Tabs
+  // TAILOR Navigation Tabs
   const tailorNavItems: NavItem[] = [
-    { id: 'tailor-dashboard', label: 'Dashboard & Pipeline' },
-    { id: 'catalog', label: 'Product Catalog' },
-    { id: 'measurements', label: 'Client Measurements' },
-    { id: 'support', label: 'Tailor Support' },
+    { id: 'products', label: 'Products' },
+    { id: 'tailor-orders', label: 'Orders' },
+    { id: 'client-measurements', label: 'Measurements' },
+    { id: 'production', label: 'Production' },
+    { id: 'tailor-delivery', label: 'Delivery' },
   ];
 
-  // Delivery Fleet Navigation Tabs
+  // DELIVERY Navigation Tabs
   const deliveryNavItems: NavItem[] = [
-    { id: 'delivery', label: 'Assigned Deliveries' },
-    { id: 'support', label: 'Logistics Support' },
+    { id: 'delivery-jobs', label: 'Jobs' },
+    { id: 'delivery-pickup', label: 'Pickup' },
+    { id: 'delivery-transit', label: 'Transit' },
+    { id: 'delivery-complete', label: 'Delivery' },
   ];
 
-  // Admin Navigation Tabs
+  // ADMIN Navigation Tabs
   const adminNavItems: NavItem[] = [
-    { id: 'admin', label: '🛡️ Platform Overview' },
-    { id: 'catalog', label: 'Clothing Categories' },
-    { id: 'tailors', label: 'Tailor Verification' },
-    { id: 'support', label: 'Support & Tickets' },
+    { id: 'admin-users', label: 'Users' },
+    { id: 'admin-tailors', label: 'Tailors' },
+    { id: 'admin-products', label: 'Products' },
+    { id: 'admin-orders', label: 'Orders' },
+    { id: 'admin-payments', label: 'Payments' },
+    { id: 'admin-reports', label: 'Reports' },
+    { id: 'admin-system', label: 'System' },
   ];
 
   const currentNavItems =
@@ -186,11 +191,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           }}
         >
           {currentNavItems.map((item) => {
-            const isActive = activeTab === item.id || (item.id === 'hero' && activeTab === 'customer-dashboard');
+            const isActive = activeTab === item.id || (item.id === 'discover' && (activeTab === 'hero' || activeTab === 'catalog' || activeTab === 'customer-dashboard' || activeTab === 'tailors'));
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  if (item.id === 'order') {
+                    onOpenCart();
+                  } else {
+                    setActiveTab(item.id);
+                  }
+                }}
                 style={{
                   background: isActive ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%)' : 'transparent',
                   color: isActive ? '#f59e0b' : '#94a3b8',

@@ -308,7 +308,19 @@ export function App() {
             </div>
           ) : (
             <>
-              {activeTab === 'hero' && <Hero setActiveTab={setActiveTab} />}
+              {(activeTab === 'hero' || activeTab === 'discover') && (
+                <>
+                  {activeTab === 'hero' && <Hero setActiveTab={setActiveTab} />}
+                  <CatalogSection
+                    products={products}
+                    favorites={favorites}
+                    profiles={profiles}
+                    onToggleFavorite={handleToggleFavorite}
+                    onAddToCart={handleAddToCart}
+                    onNavigateTab={(tab) => setActiveTab(tab)}
+                  />
+                </>
+              )}
               {activeTab === 'customer-dashboard' && (
                 <CustomerDashboard
                   profiles={profiles}
@@ -320,7 +332,7 @@ export function App() {
                   onAddToCart={handleAddToCart}
                 />
               )}
-              {activeTab === 'tailor-dashboard' && (
+              {(activeTab === 'tailor-dashboard' || activeTab === 'tailor-orders' || activeTab === 'production') && (
                 <TailorDashboard
                   tailor={tailors[0]}
                   orders={orders}
@@ -329,7 +341,7 @@ export function App() {
                   onUpdateProductionStage={handleUpdateProductionStage}
                 />
               )}
-              {activeTab === 'catalog' && (
+              {(activeTab === 'catalog' || activeTab === 'products') && (
                 <CatalogSection
                   products={products}
                   favorites={favorites}
@@ -346,7 +358,7 @@ export function App() {
                   onToggleFavorite={handleToggleFavorite}
                 />
               )}
-              {activeTab === 'favorites' && (
+              {(activeTab === 'favorites' || activeTab === 'customize') && (
                 <FavoritesSection
                   favorites={favorites}
                   onRemoveFavorite={handleRemoveFavorite}
@@ -357,7 +369,7 @@ export function App() {
                   }}
                 />
               )}
-              {activeTab === 'orders' && (
+              {(activeTab === 'orders' || activeTab === 'track') && (
                 <OrdersSection
                   orders={orders}
                   activeRole={activeRole}
@@ -370,7 +382,7 @@ export function App() {
                   }}
                 />
               )}
-              {activeTab === 'measurements' && (
+              {(activeTab === 'measurements' || activeTab === 'measure' || activeTab === 'client-measurements') && (
                 <MeasurementsSection
                   profiles={profiles}
                   onNavigateTab={(tab) => setActiveTab(tab)}
@@ -378,8 +390,8 @@ export function App() {
               )}
               {activeTab === 'addresses' && <AddressSection />}
               {activeTab === 'support' && <SupportSection activeRole={activeRole} />}
-              {activeTab === 'delivery' && <DeliverySection jobs={deliveryJobs} />}
-              {activeTab === 'admin' && adminMetrics && (
+              {(activeTab === 'delivery' || activeTab.startsWith('delivery-') || activeTab === 'tailor-delivery') && <DeliverySection jobs={deliveryJobs} />}
+              {(activeTab === 'admin' || activeTab.startsWith('admin-')) && adminMetrics && (
                 <AdminSection metrics={adminMetrics} onRefreshMetrics={reloadAdminMetrics} />
               )}
             </>
