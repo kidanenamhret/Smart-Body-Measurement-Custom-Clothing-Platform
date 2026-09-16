@@ -187,35 +187,37 @@ export const SupportSection: React.FC<SupportSectionProps> = ({ activeRole }) =>
                 Select a support ticket from the list to view live message thread and post replies.
               </div>
             ) : (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col h-full min-h-[450px]">
+              <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '450px', padding: '24px' }}>
                 {/* Thread Header */}
-                <div className="border-b border-slate-800 pb-4 mb-4 flex justify-between items-start flex-wrap gap-2">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '16px', marginBottom: '16px' }}>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-amber-400">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', fontWeight: 'bold', color: '#fcd34d' }}>
                         #{selectedTicket.ticketNumber}
                       </span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase ${getStatusBadgeStyle(selectedTicket.status)}`}>
+                      <span className="badge badge-gold" style={{ fontSize: '10px' }}>
                         {selectedTicket.status}
                       </span>
                     </div>
-                    <h3 className="text-lg font-bold text-white mt-1">{selectedTicket.subject}</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'white', marginTop: '4px', marginBottom: 0 }}>{selectedTicket.subject}</h3>
+                    <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px', marginBottom: 0 }}>
                       Submitted by: {selectedTicket.userId} ({selectedTicket.userRole})
                     </p>
                   </div>
 
                   {/* Status update buttons */}
-                  <div className="flex gap-2 flex-wrap">
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map((st) => (
                       <button
                         key={st}
                         onClick={() => handleStatusChange(selectedTicket.id || selectedTicket.ticketNumber, st as TicketStatus)}
-                        className={`text-[11px] px-2.5 py-1 rounded-lg border transition ${
-                          selectedTicket.status === st
-                            ? 'bg-amber-500/30 border-amber-400 text-amber-300 font-bold'
-                            : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
-                        }`}
+                        style={{
+                          all: 'unset', cursor: 'pointer', fontSize: '11px', padding: '4px 10px', borderRadius: '8px', transition: 'all 0.2s',
+                          ...(selectedTicket.status === st
+                            ? { backgroundColor: 'rgba(245, 158, 11, 0.3)', border: '1px solid #fcd34d', color: '#fde68a', fontWeight: 'bold' }
+                            : { backgroundColor: 'rgba(30, 41, 59, 0.8)', border: '1px solid #334155', color: '#94a3b8' }
+                          )
+                        }}
                       >
                         {st}
                       </button>
@@ -224,40 +226,43 @@ export const SupportSection: React.FC<SupportSectionProps> = ({ activeRole }) =>
                 </div>
 
                 {/* Message Stream */}
-                <div className="flex-1 overflow-y-auto space-y-3 pr-2 mb-4">
+                <div style={{ flex: '1 1 auto', overflowY: 'auto', paddingRight: '8px', marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {selectedTicket.messages?.map((msg, idx) => {
                     const isUser = msg.senderRole === 'CUSTOMER';
                     return (
                       <div
                         key={idx}
-                        className={`p-3.5 rounded-xl border max-w-[85%] text-xs space-y-1 ${
-                          isUser
-                            ? 'bg-slate-800/90 border-slate-700 ml-auto'
-                            : 'bg-amber-500/10 border-amber-500/30 text-amber-100'
-                        }`}
+                        style={{
+                          padding: '14px', borderRadius: '12px', maxWidth: '85%', fontSize: '0.75rem',
+                          ...(isUser
+                            ? { backgroundColor: 'rgba(30, 41, 59, 0.9)', border: '1px solid #334155', marginLeft: 'auto' }
+                            : { backgroundColor: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#fef3c7' }
+                          )
+                        }}
                       >
-                        <div className="flex justify-between items-center text-[10px] text-slate-400 mb-1 gap-2">
-                          <span className="font-bold text-slate-300">{msg.senderName} ({msg.senderRole})</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: '#94a3b8', marginBottom: '4px', gap: '8px' }}>
+                          <span style={{ fontWeight: 'bold', color: '#cbd5e1' }}>{msg.senderName} ({msg.senderRole})</span>
                           <span>{new Date(msg.createdAt).toLocaleString()}</span>
                         </div>
-                        <p className="text-slate-200 leading-relaxed">{msg.message}</p>
+                        <p style={{ color: '#e2e8f0', lineHeight: '1.6', margin: 0 }}>{msg.message}</p>
                       </div>
                     );
                   })}
                 </div>
 
                 {/* Reply Form */}
-                <form onSubmit={handleSendReply} className="pt-3 border-t border-slate-800 flex gap-2">
+                <form onSubmit={handleSendReply} style={{ paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', gap: '8px' }}>
                   <input
                     type="text"
                     value={replyMessage}
                     onChange={(e) => setReplyMessage(e.target.value)}
                     placeholder={`Reply as ${activeRole}...`}
-                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400"
+                    style={{ flex: 1, backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '12px', padding: '10px 16px', fontSize: '0.75rem', color: 'white', outline: 'none' }}
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl transition"
+                    className="btn-primary"
+                    style={{ padding: '10px 16px', fontSize: '0.75rem', borderRadius: '12px' }}
                   >
                     Send Reply 💬
                   </button>
