@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     } else if (role === 'ADMIN') {
       setActiveTab('admin');
     } else if (role === 'DELIVERY_AGENT') {
-      setActiveTab('delivery');
+      setActiveTab('delivery-jobs');
     }
   };
 
@@ -136,7 +136,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* BRAND LOGO */}
         <div
           style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', flexShrink: 0 }}
-          onClick={() => setActiveTab(activeRole === 'CUSTOMER' ? 'hero' : activeRole === 'TAILOR' ? 'tailor-dashboard' : activeRole === 'ADMIN' ? 'admin' : 'delivery')}
+          onClick={() => setActiveTab(activeRole === 'CUSTOMER' ? 'hero' : activeRole === 'TAILOR' ? 'tailor-dashboard' : activeRole === 'ADMIN' ? 'admin' : 'delivery-jobs')}
         >
           <div
             style={{

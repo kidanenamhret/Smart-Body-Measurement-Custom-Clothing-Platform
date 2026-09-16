@@ -341,6 +341,7 @@ export function App() {
                   tailor={tailors[0]}
                   orders={orders}
                   products={products}
+                  activeTab={activeTab}
                   onUpdateStatus={handleUpdateOrderStatus}
                   onUpdateProductionStage={handleUpdateProductionStage}
                 />
@@ -394,7 +395,7 @@ export function App() {
               )}
               {activeTab === 'addresses' && <AddressSection />}
               {activeTab === 'support' && <SupportSection activeRole={activeRole} />}
-              {(activeTab === 'delivery' || activeTab.startsWith('delivery-') || activeTab === 'tailor-delivery') && <DeliverySection jobs={deliveryJobs} />}
+              {(activeTab === 'delivery' || activeTab.startsWith('delivery-') || activeTab === 'tailor-delivery') && <DeliverySection jobs={deliveryJobs} activeTab={activeTab} />}
               {(activeTab === 'admin' || activeTab.startsWith('admin-')) && adminMetrics && (
                 <AdminSection metrics={adminMetrics} onRefreshMetrics={reloadAdminMetrics} activeTab={activeTab} />
               )}

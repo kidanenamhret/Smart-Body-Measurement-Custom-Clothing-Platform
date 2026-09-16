@@ -4,10 +4,19 @@ import { saveDeliveryJobStatus } from '../services/api';
 
 interface DeliverySectionProps {
   jobs: DeliveryJob[];
+  activeTab?: string;
 }
 
-export const DeliverySection: React.FC<DeliverySectionProps> = ({ jobs: initialJobs }) => {
+export const DeliverySection: React.FC<DeliverySectionProps> = ({ jobs: initialJobs, activeTab }) => {
   const [jobs, setJobs] = useState<DeliveryJob[]>(initialJobs);
+
+  const filteredJobs = jobs.filter((job) => {
+    if (activeTab === 'delivery-pickup') return job.status === 'ACCEPTED';
+    if (activeTab === 'delivery-transit') return job.status === 'PICKED_UP' || job.status === 'EN_ROUTE_TO_CUSTOMER';
+    if (activeTab === 'delivery-complete') return job.status === 'DELIVERED';
+    // Default / 'delivery-jobs': Show only available jobs to claim
+    return job.status === 'AVAILABLE';
+  });
 
   const handleUpdateStatus = (jobId: string, newStatus: string) => {
     // Persist immediately so navigation doesn't lose this change
@@ -27,7 +36,12 @@ export const DeliverySection: React.FC<DeliverySectionProps> = ({ jobs: initialJ
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '24px' }}>
-        {jobs.map((job) => (
+        {filteredJobs.length === 0 && (
+          <div style={{ padding: '32px', textAlign: 'center', color: '#94a3b8', gridColumn: '1 / -1', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+            No jobs found for this category.
+          </div>
+        )}
+        {filteredJobs.map((job) => (
           <div key={job.id} className="glass-card" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <span style={{ fontSize: '1.1rem', fontWeight: '700', color: '#f8fafc' }}>Job #{job.id}</span>

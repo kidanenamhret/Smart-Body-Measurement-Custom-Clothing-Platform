@@ -9,6 +9,7 @@ interface TailorDashboardProps {
   products: ClothingProduct[];
   onUpdateStatus: (orderId: string, status: OrderStatus, notes?: string) => Promise<void>;
   onUpdateProductionStage: (orderId: string, stage: TailorProductionStage, notes?: string) => Promise<void>;
+  activeTab?: string;
 }
 
 export const TailorDashboard: React.FC<TailorDashboardProps> = ({
@@ -25,9 +26,14 @@ export const TailorDashboard: React.FC<TailorDashboardProps> = ({
   products,
   onUpdateStatus,
   onUpdateProductionStage,
+  activeTab = 'tailor-dashboard',
 }) => {
-  const [activeTab, setActiveTab] = useState<'workflow' | 'products' | 'reviews'>('workflow');
+  const [internalTab, setInternalTab] = useState<'workflow' | 'products' | 'reviews'>('workflow');
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+
+  // If the parent passes 'production' activeTab, we can assume they want the workflow tab and specifically the production orders,
+  // but for now, we'll just map 'tailor-dashboard', 'tailor-orders', 'production' to 'workflow'
+  const currentView = (activeTab === 'tailor-orders' || activeTab === 'production') ? 'workflow' : internalTab;
 
   // Filter orders by tailor workflow
   const pendingOrders = orders.filter((o) =>
@@ -215,13 +221,13 @@ export const TailorDashboard: React.FC<TailorDashboardProps> = ({
       {/* DASHBOARD TABS */}
       <div style={{ display: 'flex', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '24px', gap: '16px' }}>
         <button
-          onClick={() => setActiveTab('workflow')}
+          onClick={() => setInternalTab('workflow')}
           style={{
             padding: '12px 16px',
             background: 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'workflow' ? '2px solid #f59e0b' : '2px solid transparent',
-            color: activeTab === 'workflow' ? '#f59e0b' : '#94a3b8',
+            borderBottom: currentView === 'workflow' ? '2px solid #f59e0b' : '2px solid transparent',
+            color: currentView === 'workflow' ? '#f59e0b' : '#94a3b8',
             fontWeight: '700',
             fontSize: '0.95rem',
             cursor: 'pointer',
@@ -230,13 +236,13 @@ export const TailorDashboard: React.FC<TailorDashboardProps> = ({
           🧵 Orders & Live Production Board ({orders.length})
         </button>
         <button
-          onClick={() => setActiveTab('products')}
+          onClick={() => setInternalTab('products')}
           style={{
             padding: '12px 16px',
             background: 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'products' ? '2px solid #f59e0b' : '2px solid transparent',
-            color: activeTab === 'products' ? '#f59e0b' : '#94a3b8',
+            borderBottom: currentView === 'products' ? '2px solid #f59e0b' : '2px solid transparent',
+            color: currentView === 'products' ? '#f59e0b' : '#94a3b8',
             fontWeight: '700',
             fontSize: '0.95rem',
             cursor: 'pointer',
@@ -245,23 +251,23 @@ export const TailorDashboard: React.FC<TailorDashboardProps> = ({
           👗 Workshop Products ({products.length})
         </button>
         <button
-          onClick={() => setActiveTab('reviews')}
+          onClick={() => setInternalTab('reviews')}
           style={{
             padding: '12px 16px',
             background: 'transparent',
             border: 'none',
-            borderBottom: activeTab === 'reviews' ? '2px solid #f59e0b' : '2px solid transparent',
-            color: activeTab === 'reviews' ? '#f59e0b' : '#94a3b8',
+            borderBottom: currentView === 'reviews' ? '2px solid #f59e0b' : '2px solid transparent',
+            color: currentView === 'reviews' ? '#f59e0b' : '#94a3b8',
             fontWeight: '700',
             fontSize: '0.95rem',
             cursor: 'pointer',
           }}
         >
-          ⭐ Ratings & Reviews
+          ⭐ Workshop Reviews
         </button>
       </div>
 
-      {activeTab === 'workflow' && (
+      {currentView === 'workflow' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           {/* 1. PENDING ORDERS (Requirement 40) */}
           <div>
@@ -433,7 +439,7 @@ export const TailorDashboard: React.FC<TailorDashboardProps> = ({
       )}
 
       {/* PRODUCTS TAB */}
-      {activeTab === 'products' && (
+      {currentView === 'products' && (
         <div className="glass-card" style={{ padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#f8fafc', margin: 0 }}>
@@ -462,7 +468,7 @@ export const TailorDashboard: React.FC<TailorDashboardProps> = ({
       )}
 
       {/* RATINGS & REVIEWS TAB */}
-      {activeTab === 'reviews' && (
+      {currentView === 'reviews' && (
         <div className="glass-card" style={{ padding: '24px' }}>
           <h3 style={{ fontSize: '1.2rem', fontWeight: '700', color: '#f8fafc', marginBottom: '16px' }}>
             ⭐ Workshop Reputation & Reviews
