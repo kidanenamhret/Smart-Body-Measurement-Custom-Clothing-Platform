@@ -270,25 +270,25 @@ export const SupportSection: React.FC<SupportSectionProps> = ({ activeRole }) =>
 
       {/* New Ticket Modal */}
       {showNewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white">Open Support Ticket</h3>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0, 0, 0, 0.7)', backdropFilter: 'blur(4px)', padding: '16px' }}>
+          <div className="glass-card" style={{ width: '100%', maxWidth: '448px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '12px' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: 'white', margin: 0 }}>Open Support Ticket</h3>
               <button
                 onClick={() => setShowNewModal(false)}
-                className="text-slate-400 hover:text-white"
+                style={{ all: 'unset', cursor: 'pointer', color: '#94a3b8', fontSize: '1.25rem' }}
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateTicket} className="space-y-3 text-xs">
+            <form onSubmit={handleCreateTicket} style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.75rem' }}>
               <div>
-                <label className="block text-slate-400 mb-1">Inquiry Type</label>
+                <label style={{ display: 'block', color: '#94a3b8', marginBottom: '4px' }}>Inquiry Type</label>
                 <select
                   value={newType}
                   onChange={(e) => setNewType(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                  style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '8px', padding: '8px 12px', color: 'white', outline: 'none' }}
                 >
                   <option value="GENERAL">General Question</option>
                   <option value="ORDER_ISSUE">Order / Garment Fitting Issue</option>
@@ -299,11 +299,11 @@ export const SupportSection: React.FC<SupportSectionProps> = ({ activeRole }) =>
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Priority</label>
+                <label style={{ display: 'block', color: '#94a3b8', marginBottom: '4px' }}>Priority</label>
                 <select
                   value={newPriority}
                   onChange={(e) => setNewPriority(e.target.value as TicketPriority)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                  style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '8px', padding: '8px 12px', color: 'white', outline: 'none' }}
                 >
                   <option value="LOW">Low</option>
                   <option value="MEDIUM">Medium</option>
@@ -313,41 +313,42 @@ export const SupportSection: React.FC<SupportSectionProps> = ({ activeRole }) =>
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Subject *</label>
+                <label style={{ display: 'block', color: '#94a3b8', marginBottom: '4px' }}>Subject *</label>
                 <input
                   type="text"
                   required
                   value={newSubject}
                   onChange={(e) => setNewSubject(e.target.value)}
                   placeholder="Summary of issue or request"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white"
+                  style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '8px', padding: '8px 12px', color: 'white', outline: 'none', boxSizing: 'border-box' }}
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Detailed Description *</label>
+                <label style={{ display: 'block', color: '#94a3b8', marginBottom: '4px' }}>Detailed Description *</label>
                 <textarea
                   required
                   rows={4}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
                   placeholder="Describe your request in detail..."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-white"
+                  style={{ width: '100%', backgroundColor: '#020617', border: '1px solid #1e293b', borderRadius: '8px', padding: '12px', color: 'white', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}
                 />
               </div>
 
-              <div className="pt-4 flex justify-end gap-2">
+              <div style={{ paddingTop: '16px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                 <button
                   type="button"
                   onClick={() => setShowNewModal(false)}
-                  className="px-3 py-1.5 text-slate-400 hover:text-white"
+                  style={{ all: 'unset', cursor: 'pointer', padding: '6px 12px', color: '#94a3b8' }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg disabled:opacity-50"
+                  className="btn-primary"
+                  style={{ opacity: isSubmitting ? 0.5 : 1, padding: '8px 16px', fontSize: '0.75rem', borderRadius: '8px' }}
                 >
                   {isSubmitting ? 'Submitting...' : 'Create Ticket'}
                 </button>
