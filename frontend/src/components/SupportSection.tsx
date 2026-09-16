@@ -79,30 +79,6 @@ export const SupportSection: React.FC<SupportSectionProps> = ({ activeRole }) =>
     await loadTickets();
   };
 
-  const getPriorityBadgeStyle = (priority: TicketPriority) => {
-    switch (priority) {
-      case 'URGENT':
-        return 'bg-red-500/20 text-red-400 border-red-500/40';
-      case 'HIGH':
-        return 'bg-amber-500/20 text-amber-400 border-amber-500/40';
-      case 'MEDIUM':
-        return 'bg-sky-500/20 text-sky-400 border-sky-500/40';
-      default:
-        return 'bg-slate-700/50 text-slate-300 border-slate-600';
-    }
-  };
-
-  const getStatusBadgeStyle = (status: TicketStatus) => {
-    switch (status) {
-      case 'RESOLVED':
-      case 'CLOSED':
-        return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40';
-      case 'IN_PROGRESS':
-        return 'bg-amber-500/20 text-amber-400 border-amber-500/40';
-      default:
-        return 'bg-purple-500/20 text-purple-300 border-purple-500/40';
-    }
-  };
 
   return (
     <section className="py-8 space-y-6">

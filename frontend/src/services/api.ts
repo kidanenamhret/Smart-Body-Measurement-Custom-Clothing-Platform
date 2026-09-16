@@ -2038,65 +2038,9 @@ export async function checkReviewEligibility(orderId: string): Promise<{ isEligi
    26. SUPPORT TICKETS API
    ========================================== */
 
-export async function createSupportTicket(payload: {
-  subject: string;
-  description: string;
-  type?: string;
-  orderId?: string;
-  priority?: string;
-}): Promise<{ message: string; ticket: SupportTicketItem }> {
-  try {
-    const res = await fetch(`${API_BASE}/api/support/tickets`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    if (res.ok) return await res.json();
-  } catch (err) {
-    console.warn('Backend API unreachable, creating mock ticket');
-  }
 
-  const ticketNumber = `TKT-${Date.now().toString(36).toUpperCase()}`;
-  return {
-    message: 'Support ticket created!',
-    ticket: {
-      id: `tkt-${Date.now()}`,
-      ticketNumber,
-      userId: 'cust-101',
-      userRole: 'CUSTOMER',
-      type: (payload.type as any) || 'GENERAL',
-      orderId: payload.orderId,
-      subject: payload.subject,
-      description: payload.description,
-      status: 'OPEN',
-      priority: (payload.priority as any) || 'MEDIUM',
-      messages: [
-        {
-          senderId: 'cust-101',
-          senderRole: 'CUSTOMER',
-          senderName: 'Abebe Bikila',
-          message: payload.description,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  };
-}
 
-export async function fetchSupportTickets(): Promise<SupportTicketItem[]> {
-  try {
-    const res = await fetch(`${API_BASE}/api/support/tickets`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.tickets) return data.tickets;
-    }
-  } catch (err) {
-    console.warn('Backend API unreachable, returning mock tickets');
-  }
-
-  return [
+export const DEFAULT_SUPPORT_TICKETS: SupportTicketItem[] = [
     {
       id: 'tkt-1',
       ticketNumber: 'TKT-9081',
@@ -2130,6 +2074,93 @@ export async function fetchSupportTickets(): Promise<SupportTicketItem[]> {
   ];
 }
 
+function getLocalSupportTickets(): SupportTicketItem[] {
+  try {
+    const raw = localStorage.getItem('sewfit_support_tickets');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  return DEFAULT_SUPPORT_TICKETS;
+}
+
+function setLocalSupportTickets(tickets: SupportTicketItem[]) {
+  try {
+    localStorage.setItem('sewfit_support_tickets', JSON.stringify(tickets));
+  } catch (e) {}
+}
+
+export async function createSupportTicket(payload: {
+  subject: string;
+  description: string;
+  type?: string;
+  orderId?: string;
+  priority?: string;
+}): Promise<{ message: string; ticket: SupportTicketItem }> {
+  try {
+    const res = await fetch(`${API_BASE}/api/support/tickets`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn('Backend API unreachable, creating mock ticket');
+  }
+
+  const ticketNumber = `TKT-${Date.now().toString(36).toUpperCase()}`;
+  const newTicket: SupportTicketItem = {
+    id: `tkt-${Date.now()}`,
+    ticketNumber,
+    userId: 'cust-101',
+    userRole: 'CUSTOMER',
+    type: (payload.type as any) || 'GENERAL',
+    orderId: payload.orderId,
+    subject: payload.subject,
+    description: payload.description,
+    status: 'OPEN',
+    priority: (payload.priority as any) || 'MEDIUM',
+    messages: [
+      {
+        senderId: 'cust-101',
+        senderRole: 'CUSTOMER',
+        senderName: 'Abebe Bikila',
+        message: payload.description,
+        createdAt: new Date().toISOString(),
+      },
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const current = getLocalSupportTickets();
+  current.unshift(newTicket);
+  setLocalSupportTickets(current);
+
+  return {
+    message: 'Support ticket created!',
+    ticket: newTicket,
+  };
+}
+
+export async function fetchSupportTickets(): Promise<SupportTicketItem[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/support/tickets`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.tickets) {
+        setLocalSupportTickets(data.tickets);
+        return data.tickets;
+      }
+    }
+  } catch (err) {
+    console.warn('Backend API unreachable, returning mock tickets');
+  }
+
+  return getLocalSupportTickets();
+}
+
 export async function addTicketMessage(ticketId: string, message: string, senderRole: string = 'CUSTOMER', senderName: string = 'Abebe Bikila'): Promise<{ message: string; ticket: SupportTicketItem }> {
   try {
     const res = await fetch(`${API_BASE}/api/support/tickets/${ticketId}/messages`, {
@@ -2142,30 +2173,32 @@ export async function addTicketMessage(ticketId: string, message: string, sender
     console.warn('Backend API unreachable, adding local ticket reply');
   }
 
+  const current = getLocalSupportTickets();
+  const ticketIdx = current.findIndex(t => t.id === ticketId || t.ticketNumber === ticketId);
+  
+  if (ticketIdx >= 0) {
+    const ticket = current[ticketIdx];
+    if (!ticket.messages) ticket.messages = [];
+    ticket.messages.push({
+      senderId: `user-${Date.now()}`,
+      senderRole,
+      senderName,
+      message,
+      createdAt: new Date().toISOString(),
+    });
+    ticket.updatedAt = new Date().toISOString();
+    setLocalSupportTickets(current);
+    
+    return {
+      message: 'Reply posted to ticket thread',
+      ticket,
+    };
+  }
+
+  // Fallback if not found
   return {
     message: 'Reply posted to ticket thread',
-    ticket: {
-      id: ticketId,
-      ticketNumber: 'TKT-9081',
-      userId: 'cust-101',
-      userRole: 'CUSTOMER',
-      type: 'GENERAL',
-      subject: 'Support Ticket',
-      description: message,
-      status: 'IN_PROGRESS',
-      priority: 'MEDIUM',
-      messages: [
-        {
-          senderId: 'user-1',
-          senderRole,
-          senderName,
-          message,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
+    ticket: current[0],
   };
 }
 
@@ -2181,22 +2214,24 @@ export async function updateTicketStatus(ticketId: string, status: string, resol
     console.warn('Backend API unreachable, updating local ticket status');
   }
 
+  const current = getLocalSupportTickets();
+  const ticketIdx = current.findIndex(t => t.id === ticketId || t.ticketNumber === ticketId);
+  
+  if (ticketIdx >= 0) {
+    const ticket = current[ticketIdx];
+    ticket.status = status as any;
+    ticket.updatedAt = new Date().toISOString();
+    setLocalSupportTickets(current);
+    
+    return {
+      message: `Ticket status updated to ${status}`,
+      ticket,
+    };
+  }
+
   return {
     message: `Ticket status updated to ${status}`,
-    ticket: {
-      id: ticketId,
-      ticketNumber: 'TKT-9081',
-      userId: 'cust-101',
-      userRole: 'CUSTOMER',
-      type: 'GENERAL',
-      subject: 'Support Ticket',
-      description: 'Ticket description',
-      status: status as any,
-      priority: 'MEDIUM',
-      messages: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
+    ticket: current[0]
   };
 }
 
