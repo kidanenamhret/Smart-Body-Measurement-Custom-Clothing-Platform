@@ -81,7 +81,10 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
             </div>
           ) : (
             notifications.map((item) => {
-              const notifId = item.id || item._id || item.notificationId;
+              const notifId = item.id || item._id || item.notificationId || Math.random().toString();
+              const eventTypeStr = item.eventType || 'SYSTEM_UPDATE';
+              const channelStr = item.channel || 'in-app';
+              
               return (
                 <div
                   key={notifId}
@@ -100,7 +103,7 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
                       <span className="badge badge-cyan" style={{ fontSize: '0.65rem' }}>
-                        {item.channel} • {item.eventType.replace(/_/g, ' ')}
+                        {channelStr} • {eventTypeStr.replace(/_/g, ' ')}
                       </span>
                       {!item.isRead && (
                         <button
@@ -111,11 +114,11 @@ export const NotificationDrawer: React.FC<NotificationDrawerProps> = ({
                         </button>
                       )}
                     </div>
-                    <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-main)', margin: '0 0 4px 0' }}>{item.title}</h4>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>{item.body}</p>
+                    <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-main)', margin: '0 0 4px 0' }}>{item.title || 'Notification'}</h4>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>{item.body || ''}</p>
                   </div>
                   <div style={{ marginTop: '12px', fontSize: '0.65rem', color: 'var(--text-dim)', textAlign: 'right' }}>
-                    {new Date(item.createdAt).toLocaleString()}
+                    {item.createdAt ? new Date(item.createdAt).toLocaleString() : 'Just now'}
                   </div>
                 </div>
               );
